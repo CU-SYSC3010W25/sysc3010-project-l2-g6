@@ -11,7 +11,9 @@ How many hours did you spend on the project this week? 3
 Give rough breakdown of hours spent on 1-3 of the following:* (meetings, information gathering, design, research, brainstorming, evaluating options, prototyping options, writing/documenting, refactoring, testing, software implementation, hardware implementation)
 
 Top item: Group Meeting, 2 hours
+
 2nd item: Research, 1 hour
+
 What did you accomplish this week? (Be specific)
 - The group held a meeting, where we discussed the feasibility of the project, as well as a breakdown of tasks, and shared research that group members had done individually. Group decided how to fulfull certain requirements, such as deciding on pi camera and microphone as sensors, and a camera adjusting motor for the actuator requirement. Group also decided on functionality of certain elements, such as the GUI to display output and alternate input between users.
 - Did individual research on AI libraries and database storage on raspberry pi, finding that images and other media can be stored within databases, and narrowing down the AI libraries needed for the project to openCV and PyTorch.
