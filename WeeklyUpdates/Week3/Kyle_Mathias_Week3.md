@@ -1,7 +1,11 @@
 Weekly Individual Project Update Report
+
 Group number: L2-G6
+
 Student name: Kyle Mathias
+
 Week: Week 3
+
 How many hours did you spend on the project this week? 3
 
 Give rough breakdown of hours spent on 1-3 of the following:* (meetings, information gathering, design, research, brainstorming, evaluating options, prototyping options, writing/documenting, refactoring, testing, software implementation, hardware implementation)
