@@ -10,8 +10,9 @@
 
 2. ***Give rough breakdown of hours spent on 1-3 of the following:* (meetings, information gathering, design, research, brainstorming, evaluating options, prototyping options, writing/documenting, refactoring, testing, software implementation, hardware implementation)***
 
-Top item: Group Meeting, 2 hours
-2nd item: Research, 1 hour
+- Top item: Group Meeting, 2 hours
+
+- 2nd item: Research, 1 hour
 
 3. **What did you accomplish this week? (Be specific)**
 - The group held a meeting, where we discussed the feasibility of the project, as well as a breakdown of tasks, and shared research that group members had done individually. Group decided how to fulfull certain 
