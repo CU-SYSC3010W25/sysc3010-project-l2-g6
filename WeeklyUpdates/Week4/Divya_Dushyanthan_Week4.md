@@ -30,4 +30,4 @@ I'm pleased with our team's progress—we're consistently staying ahead of deadl
   - Finish draft proposal before Feb 3rd to recieve feedback on CrowdGrader.
   - Finalize GUI Mockup
 6. ***Is anything blocking you that you need from others?*** _(What do you need from whom)_
-  - TNothing currently blocking me.
+  - Nothing currently blocking me.
