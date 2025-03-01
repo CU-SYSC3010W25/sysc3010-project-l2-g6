@@ -7,9 +7,9 @@
 
 2. **Give rough breakdown of hours spent on 1-3 of the following:***
    (meetings, information gathering, design, research, brainstorming, evaluating options, prototyping options, writing/documenting, refactoring, testing, software implementation, hardware implementation)
-  1. Writing/documenting (Design Document): 3 hours
-  2. Hardware implementation (Achieved end-to-end communication between two pis): 1.5 hours
-  3. Software implementation (Progress towards sending/receiving encoded camera data between two pis. 1.5 hours
+  - Writing/documenting (Design Document): 3 hours
+  - Hardware implementation (Achieved end-to-end communication between two pis): 1.5 hours
+  - Software implementation (Progress towards sending/receiving encoded camera data between two pis. 1.5 hours
    
 4. ***What did you accomplish this week?*** _(Be specific)_
   - Discussed which parts of the design document we will be writing.
