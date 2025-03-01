@@ -12,13 +12,12 @@
    3. Evaluating Options (Component Orders): 1 hour
    
 3. ***What did you accomplish this week?*** _(Be specific)_
-  - Completed Project Proposal
+  - Completed Project Proposal.
   - Discussed the components to be used with Kyle
   - Helped my team members complete parts of the Project Proposal they had trouble with.
 
 4. ***How do you feel about your progress?*** _(brief, free-form reflection)_
-  - I feel that great progress was made, better than last week 4.
-  - However, I feel worried that the final proposal will be of lower quality because it was incomplete after proposal feedbacks were conducted.
+  - I feel that great progress was made, better than last week 5.
     
 5. ***What are you planning to do next week***? _(give specific goals)_
   - Next week is reading week
