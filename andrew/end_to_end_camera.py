@@ -1,8 +1,7 @@
-from picamera2 import Picamera2
-from time import sleep
+from picamera2 import Picamera2, Preview
+from libcamera import Transform
 
-cam = Picamera2()
-cam.start_preview()
-# Keep the preview window open for 5 seconds
-sleep(5)
-cam.stop_preview()
+picam2 = Picamera2()
+picam2.start_preview(Preview.QTGL, x=100, y=200, width=800, height=600,
+transform=Transform(hflip=1))
+picam2.start()
