@@ -14,29 +14,14 @@ config = {
 sense = SenseHat()
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
-dataset = "andrew_sensor"
+dataset = "ui_test_messages"
 
 # Write random numbers to database
 def writeData():
-    key = 0
-
-    for i in range (3):
-        sensorData = sense.get_temperature()
-
-        # Will be written in this form:
-        # {
-        #   "andrew_sensor" : {
-    #     "0" : 0.6336863763908736,
-    #     "1" : 0.33321038818190285,
-    #     "2" : 0.6069185320998802,
-    #     "3" : 0.470459178006184,
-    #   }
-    # }
-    # Each 'child' is a JSON key:value pair
-        db.child(dataset).child(key).set(sensorData)
-
-        key = key + 1
-        time.sleep(1)
+    key = 1
+    sensorData = "pi 1"
+    db.child(dataset).child(key).set(sensorData)
+    time.sleep(1)
     
 
 def readData():
@@ -54,16 +39,16 @@ def readData():
   print("Child Key: {}".format(lastDataPoint.key()))
   print("Child Value: {}\n".format(lastDataPoint.val()))
   
-def clearData():
-    try:
+#def clearData():
+    #try:
         # Reference the dataset and remove all data under it
-        db.child(dataset).remove()
-        print(f"All data under '{dataset}' has been cleared.")
-    except Exception as e:
-        print(f"An error occurred while clearing data: {e}")
+       # db.child(dataset).remove()
+       # print(f"All data under '{dataset}' has been cleared.")
+   # except Exception as e:
+        # print(f"An error occurred while clearing data: {e}")
 
 def main ():
-    clearData()
+   #clearData()
     writeData()
     readData()
 
