@@ -20,38 +20,11 @@ def setGesture(gesture: str):
 
 def updateGestures(gestures: list):
     for g in gestures:
-        prevGesture = dict(db.child(dataset).child(labels[0]).get().val())
-        db.child(dataset).child(labels[1]).set(prevGesture.get(labels[0]))
+        prevGesture = db.child(dataset).child(labels[0]).get().val()
+        db.child(dataset).child(labels[1]).set(prevGesture)
         db.child(dataset).child(labels[0]).set(g)
         print(f"wrote '{g}' to database at currentGesture")
         time.sleep(10)
-        
-
-# Write test messages to Firebase
-def writeTestMessages():
-    messages = ["Hello", "Testing 1", "This is a UI test"]
-   
-    for i, msg in enumerate(messages):
-        db.child(dataset).child(i).set(msg)
-        time.sleep(1)
-
-    print("Test messages written to Firebase.")
-
-# Read messages back from Firebase
-def readTestMessages():
-    myMessages = db.child(dataset).get()
-
-    print("Messages from Firebase:")
-    for message in myMessages.each():
-        print(f"{message.key()}: {message.val()}")
-
-# Clear previous test messages
-def clearTestMessages():
-    try:
-        db.child(dataset).remove()
-        print(f"All messages under '{dataset}' have been cleared.")
-    except Exception as e:
-        print(f"Error clearing messages: {e}")
 
 def main():
     setGesture("lol")
