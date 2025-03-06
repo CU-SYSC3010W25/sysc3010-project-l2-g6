@@ -1,11 +1,13 @@
 import RPi.GPIO as GPIO
 import time
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(4, GPIO.OUT)
-
 class Fan:
+    @staticmethod
+    def setupFan():
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(18, GPIO.OUT)
+
     @staticmethod
     def on():
         GPIO.output(18, True)
@@ -13,3 +15,8 @@ class Fan:
     @staticmethod
     def off():
         GPIO.output(18, False)
+
+Fan.setupFan()
+Fan.on()
+time.sleep(5)
+Fan.off()
