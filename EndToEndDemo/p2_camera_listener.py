@@ -3,9 +3,8 @@ import time
 
 # Updated GStreamer pipeline for receiving a raw H264 stream
 gst_pipeline = (
-    "udpsrc port=5000 ! "
-    "application/x-h264, stream-format=byte-stream, alignment=au ! "
-    "h264parse ! avdec_h264 ! videoconvert ! appsink"
+    "udpsrc port=5000 caps=\"application/x-h264, stream-format=(string)byte-stream, alignment=(string)au\" ! "
+    "h264parse ! avdec_h264 ! videoconvert ! appsink sync=false"
 )
 
 # Open the video stream using OpenCV
