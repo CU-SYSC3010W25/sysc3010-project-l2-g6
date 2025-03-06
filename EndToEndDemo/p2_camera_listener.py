@@ -1,10 +1,11 @@
-import subprocess
 import cv2
+import time
 
-# Define the GStreamer pipeline for receiving the video stream
+# Updated GStreamer pipeline for receiving a raw H264 stream
 gst_pipeline = (
-    "udpsrc port=5000 caps=\"application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, payload=96\" ! "
-    "rtph264depay ! avdec_h264 ! videoconvert ! appsink"
+    "udpsrc port=5000 ! "
+    "application/x-h264, stream-format=byte-stream, alignment=au ! "
+    "h264parse ! avdec_h264 ! videoconvert ! appsink"
 )
 
 # Open the video stream using OpenCV
