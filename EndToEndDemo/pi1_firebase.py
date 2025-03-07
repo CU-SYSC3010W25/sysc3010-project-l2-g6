@@ -18,7 +18,7 @@ dataset = "ui_test_messages"
 # Write random numbers to database
 def writeData():
     key = 1
-    sensorData = "Test pi 1"
+    sensorData = input("Enter data: ")
     db.child(dataset).child(key).set(sensorData)
     time.sleep(1)
 
