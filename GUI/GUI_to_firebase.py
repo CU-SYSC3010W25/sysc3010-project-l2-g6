@@ -15,7 +15,7 @@ dataset = "ui_test_messages"
 
 # Write test messages to Firebase
 def writeTestMessages():
-    messages = ["Hello", "Testing 1", "This is a UI test"]
+    messages = ["Hello World!", "Testing 1", "This is a UI test"]
    
     for i, msg in enumerate(messages):
         db.child(dataset).child(i).set(msg)
