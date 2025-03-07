@@ -1,72 +1,58 @@
-import asyncio
 import firebase_admin
 from firebase_admin import credentials, db
+import time
 
-# Initialize Firebase
-cred = credentials.Certificate("sysc-3010-project-l2-g6-firebase-adminsdk-fbsvc-70fcaf4ec4.json")
-firebase_admin.initialize_app(cred, {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"})
+# Path to the Firebase service account key JSON file
+cred = credentials.Certificate("/home/divyadushy/InterprePi/sysc3010-project-l2-g6/config/interprePi access key.json")
 
-latest_stream_enabled = None
+# Initialize Firebase app (only call this ONCE per script)
+firebase_admin.initialize_app(cred, {
+    "databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"
+})
 
-def update_settings(pi1_status, pi2_status, pi3_status):
-    """Updates Firebase with system settings."""
-    ref = db.reference("/")
-    settings_data = {
-        "settings": {
-            "pi1": {"stream_enabled": pi1_status},
-            "pi2": {"processing_enabled": pi2_status},
-            "pi3": {"led_display_enabled": pi3_status}
-        },
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z"
-    }
-    ref.set(settings_data)
-    print("✅ Settings updated in Firebase.")
+print("Firebase Listener Started")
 
-# Example: Enable streaming, processing, and LED display
-update_settings(True, True, True)
+# Function to fetch the current value without waiting for an event
+def get_current_gesture():
+    try:
+        gesture_ref = db.reference("Gestures/currentGesture")
+        current_value = gesture_ref.get()
+        return current_value
+    except Exception as e:
+        print("Error fetching current value:", str(e))
+        return None
 
-def fetch_settings(queue):
-    """Listens for Firebase updates and sends them to the queue."""
-    ref = db.reference("ui_test_messages/0")
+# Get initial value before starting the listener
+previous_gesture = get_current_gesture()
+print("Current Gesture Value:", previous_gesture)
 
-    def stream_listener(event):
-        """Triggered when 'stream_enabled' changes."""
-        print(f"🔥 Firebase event received: {event}")  # Debugging line
-        new_value = event.data
-        queue.put_nowait(new_value)
+# Callback function triggered when 'Gestures/currentGesture' changes
+def stream_listener(event):
+    """Handles updates from Firebase."""
+    global previous_gesture  # Store last known value
 
-    ref.listen(stream_listener)  # Start listening in the background
+    new_value = event.data  # The updated value from Firebase
 
-async def process_updates(queue):
-    """Process updates from the Firebase listener."""
-    global latest_stream_enabled
-    while True:
-        new_value = await queue.get()
-        if new_value != latest_stream_enabled:
-            latest_stream_enabled = new_value
-            print(f"⚡ Stream Enabled Changed: {new_value}")
+    if new_value is None:
+        print("Warning: Received None. Check Firebase for missing data.")
+        return  # Exit to avoid errors
 
-            if new_value:
-                print("✅ Starting RTSP Stream...")
-            else:
-                print("⛔ Stopping RTSP Stream...")
+    if new_value == previous_gesture:
+        return  # Ignore if the gesture hasn't changed
 
-async def other_task():
-    """Simulate another task running in parallel."""
-    while True:
-        print("🔄 Running other tasks...")
-        await asyncio.sleep(5)
+    if not new_value:  # No gesture detected
+        print("Streaming stopped!")
+        # Code to stop RTSP server
+    else:
+        print("New Gesture Detected:", new_value)
+        # Code to start RTSP server
 
-async def main():
-    """Main async function to run Firebase listener + other tasks in parallel."""
-    queue = asyncio.Queue()
+    previous_gesture = new_value  # Update the stored gesture
 
-    fetch_settings(queue)  # Start Firebase listener in a normal function
+# Attach listener to Firebase (real-time updates)
+stream_ref = db.reference("Gestures/currentGesture")
+stream_ref.listen(stream_listener)
 
-    await asyncio.gather(
-        process_updates(queue),  # Process updates from Firebase
-        other_task()             # Other system task
-    )
-
-# Start the async event loop
-asyncio.run(main())
+# Keep the script running
+while True:
+    time.sleep(10)  # Prevents script from exiting
