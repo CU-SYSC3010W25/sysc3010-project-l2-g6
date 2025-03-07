@@ -1,9 +1,11 @@
+#listen for settings update from firebase
+
 import asyncio
 import firebase_admin
 from firebase_admin import credentials, db
 
 # Initialize Firebase
-cred = credentials.Certificate("/home/andrewrivera/sysc3010-project-l2-g6/config/interprePi access key.json")
+cred = credentials.Certificate("/home/kylemathias/Project/sysc3010-project-l2-g6/config/interprePi access key.json")
 firebase_admin.initialize_app(cred, {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"})
 
 latest_stream_enabled = None

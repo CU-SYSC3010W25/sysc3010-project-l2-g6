@@ -1,3 +1,5 @@
+#receive rtsp stream from pi 1
+
 import cv2
 import time
 
