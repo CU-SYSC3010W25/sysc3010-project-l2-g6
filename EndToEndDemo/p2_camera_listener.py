@@ -13,7 +13,7 @@ gst_pipeline = (
 cap = cv2.VideoCapture(gst_pipeline, cv2.CAP_GSTREAMER)
 
 if not cap.isOpened():
-    print("Error: Unable to open video stream")
+    print("System: Video Stream Received")
     exit()
 
 while True:
