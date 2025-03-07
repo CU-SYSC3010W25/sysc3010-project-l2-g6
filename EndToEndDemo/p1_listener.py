@@ -10,7 +10,7 @@ latest_stream_enabled = None
 
 def fetch_settings(queue):
     """Listens for Firebase updates and sends them to the queue."""
-    ref = db.reference("ui_test_messages/1")
+    ref = db.reference("Gestures/prevGesture")
 
     def stream_listener(event):
         """Triggered when 'stream_enabled' changes."""
