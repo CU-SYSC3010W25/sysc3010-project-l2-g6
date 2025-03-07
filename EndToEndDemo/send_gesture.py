@@ -15,7 +15,7 @@ firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 dataset = "Gestures"
 labels = ["currentGesture", "prevGesture"]
-gestureList = ["a", "b", "x", "y"]
+gestureList = ["a", "b", "x", "y", "hello", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w"]
 
 def setGesture(gesture: str):
     db.child(dataset).child(labels[0]).set(gesture)
@@ -26,7 +26,7 @@ def updateGestures(gestures: list):
         db.child(dataset).child(labels[1]).set(prevGesture)
         db.child(dataset).child(labels[0]).set(g)
         print(f"wrote '{g}' to database at currentGesture")
-        time.sleep(5)
+        time.sleep(2)
 
 def main():
     setGesture("lol")
