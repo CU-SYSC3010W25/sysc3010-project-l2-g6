@@ -31,5 +31,6 @@ def updateGestures(gestures: list):
 def main():
     setGesture("lol")
     updateGestures(gestureList)
+    main()
 
 main()
