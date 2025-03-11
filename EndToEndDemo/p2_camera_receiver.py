@@ -1,11 +1,3 @@
-import os
-import warnings
-
-# Suppress warnings
-os.environ["OPENCV_LOG_LEVEL"] = "ERROR"
-os.environ["QT_LOGGING_RULES"] = "*.debug=false"
-warnings.filterwarnings("ignore", category=UserWarning, module="cv2")
-
 import cv2
 
 # GStreamer pipeline for receiving RTP-encapsulated H.264 over UDP
