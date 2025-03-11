@@ -1,10 +1,40 @@
-import subprocess
+import os
+import warnings
 
-# Updated GStreamer pipeline for a raw H264 stream over UDP
+# Suppress warnings
+os.environ["OPENCV_LOG_LEVEL"] = "ERROR"
+os.environ["QT_LOGGING_RULES"] = "*.debug=false"
+warnings.filterwarnings("ignore", category=UserWarning, module="cv2")
+
+import cv2
+
+# GStreamer pipeline for receiving RTP-encapsulated H.264 over UDP
 gst_pipeline = (
-    "gst-launch-1.0 udpsrc port=5000 caps=\"application/x-h264, stream-format=(string)byte-stream, alignment=(string)au\" ! "
-    "h264parse ! avdec_h264 ! videoconvert ! autovideosink"
+    "udpsrc port=5000 ! "
+    "application/x-rtp, media=video, encoding-name=H264, payload=96 ! "
+    "rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink"
 )
 
-# Start the GStreamer pipeline
-process = subprocess.Popen(gst_pipeline, shell=True)
+# Open the video stream in OpenCV
+cap = cv2.VideoCapture(gst_pipeline, cv2.CAP_GSTREAMER)
+
+if not cap.isOpened():
+    print("Error: Unable to open video stream")
+    exit()
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("Error: Unable to read frame")
+        break
+
+    # Display the frame
+    cv2.imshow('Video Stream', frame)
+
+    # Exit on 'q' key press
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release everything
+cap.release()
+cv2.destroyAllWindows()
