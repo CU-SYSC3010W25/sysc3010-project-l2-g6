@@ -6,3 +6,4 @@ __pycache__/
 # Virtual environment
 venv/
 .env/
+EndToEndDemo/p1__camera.py
