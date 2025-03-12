@@ -130,7 +130,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       // Get the hostname or fallback to a default Raspberry Pi IP
-      const hostIP = window.location.hostname || "192.168.2.157";
+      const hostIP = window.location.hostname || "172.17.119.47";
       const streamUrl = `http://${hostIP}:8080/?action=stream`;
       document.getElementById("cameraFeed").src = streamUrl;
       
