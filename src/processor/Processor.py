@@ -14,7 +14,7 @@ class Processor:
         self.cap.release()
         cv2.destroyAllWindows()
 
-    def process_frames(self):
+    def processFrames(self):
         while True:
             ret, frame = self.cap.read()
             if not ret:
@@ -28,3 +28,12 @@ class Processor:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
+
+
+def main():
+    processor = Processor()
+    processor.processFrames()
+
+
+if __name__ == "__main__":
+    main()
