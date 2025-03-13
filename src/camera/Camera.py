@@ -7,7 +7,7 @@ class Camera:
     def __init__(self):
         pass
 
-    def runCamera():
+    def runCamera(self):
         process = subprocess.Popen(config.VID_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         while True:
