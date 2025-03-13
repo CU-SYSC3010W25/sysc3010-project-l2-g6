@@ -1,5 +1,7 @@
 #receive rtsp stream from pi 1
 
+#!!! FILE IS OUTDATED !!!
+
 import cv2
 import time
 
