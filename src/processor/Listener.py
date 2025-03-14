@@ -19,7 +19,7 @@ class Listener:
         self.ref = db.reference(config.SETTINGS)
 
         def streamListener(event):
-            print(f"Firebase event received: {event.data}")
+            print(f"Firebase event received: {event.path.lstrip('/')}: {event.data}")
             self.callback(event.data)
 
         self.ref.listen(streamListener)
