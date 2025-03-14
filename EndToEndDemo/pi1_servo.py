@@ -16,9 +16,11 @@ def set_angle(angle):
 
 try:
     while True:
-        set_angle(0)
-        time.sleep(1)
-        set_angle(180)
+        #set_angle(0)
+        #time.sleep(1)
+        #set_angle(180)
+        #time.sleep(1)
+        set_angle(90)
         time.sleep(1)
 except KeyboardInterrupt:
     pass
