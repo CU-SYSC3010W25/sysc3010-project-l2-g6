@@ -11,6 +11,7 @@ class Camera:
         subprocess.run(['bash', self.IPScriptPath]) 
         self.listener = Listener(self.stream)
         self.process = None
+        
 
     def runCamera(self):
         self.process = subprocess.Popen(config.VID_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -33,6 +34,6 @@ class Camera:
             self.stopCamera()
         
     def listen(self):
-        while (True):
+        while True:
             self.listener.getSettings()
         

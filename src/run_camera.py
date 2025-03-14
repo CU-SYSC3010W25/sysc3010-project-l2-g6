@@ -3,7 +3,7 @@ import asyncio
 
 async def listener():
     print ("Listener: Starting...")
-    await Camera().listen()
+    Camera().listen()
     print (("Listener: Done"))
 
 async def run_camera():
