@@ -1,8 +1,20 @@
 from camera.Camera import Camera
+import asyncio
 
-def main():
-    camera = Camera()
-    camera.runCamera()
+async def listener():
+    print ("Listener: Starting...")
+    await Camera().listen()
+    print (("Listener: Done"))
 
-if __name__ == "__main__":
-    main()
+async def run_camera():
+    print ("Camera: Starting...")
+    Camera().runCamera()
+    print ("Camera: Done")
+
+async def main():
+    await asyncio.gather(
+        listener(),
+        run_camera()
+    )
+
+asyncio.run(main())
