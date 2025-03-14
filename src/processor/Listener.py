@@ -4,14 +4,14 @@ from firebase_admin import credentials, db
 from processor import config
 
 class Listener:
-    def __init__(self, callback):
-        self.callback = callback
+    def __init__(self, streamCallback):
+        self.streamCallback = streamCallback
 
         self.ref = None
         self.cred = None
-        self.initalize_FB()
+        self.initalizeFB()
 
-    def initalize_FB(self):
+    def initalizeFB(self):
         self.cred = credentials.Certificate(config.FB_CERT)
         firebase_admin.initialize_app(self.cred, config.FB_URL)
 
@@ -19,8 +19,12 @@ class Listener:
         self.ref = db.reference(config.SETTINGS)
 
         def streamListener(event):
-            print(f"Firebase event received: {event.path.lstrip('/')}: {event.data}")
-            self.callback(event.data)
+            key = event.path.lstrip('/')
+            value = event.data
+            print(f"Firebase event received: {key}: {value}")
+
+            if key == "Stream":
+                self.streamCallback(value)
 
         self.ref.listen(streamListener)
 
