@@ -2,8 +2,6 @@ import cv2
 import threading
 import os
 import subprocess
-import time 
-import re
 
 from processor import config
 from processor.Listener import Listener
