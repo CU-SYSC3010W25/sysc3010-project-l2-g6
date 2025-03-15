@@ -2,17 +2,24 @@ import os
 import subprocess
 import asyncio
 import time
+import RPi.GPIO as GPIO
+
 from camera import config
 from camera.Listener import Listener
 
 class Camera:
     def __init__(self):
-        self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
-        subprocess.run(['bash', self.IPScriptPath])  # Set IP address on startup
-        
         self.listener = Listener(self.stream)
         self.process = None
         self.running = False
+
+        self.servoPin = None
+        self.servoPWM = None
+        self.servoCurrentAngle = 0
+        self.servoSpeed = 0
+
+        self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
+        subprocess.run(['bash', self.IPScriptPath])  # Set IP address on startup
 
     async def run(self):
         """Starts both the camera and Firebase listener asynchronously."""
@@ -53,4 +60,24 @@ class Camera:
     async def listen_for_changes(self):
         """Runs the Firebase listener asynchronously."""
         await asyncio.to_thread(self.listener.getSettings)
+
+
+
+    #servo stuff
+    def initializeServo(self):
+        """Function for getting servo ready """
+        self.servoPin = 18
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.servoPin, GPIO.OUT)
+
+        self.servoPWM = GPIO.PWM(self.servoPin, 50)
+        self.servoPWM.start(0)
+
+        self.servoSpeed = 25
+
+    def setServoAngle(self, angle):
+        pass
+
+    def moveServo(self, rotation):
+        pass
 
