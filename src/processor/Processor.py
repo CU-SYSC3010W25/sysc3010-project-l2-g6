@@ -33,6 +33,8 @@ class Processor:
             print("Error: Unable to open video stream")
             return  # Exit safely
 
+        print("CV2: Video opened")
+
         while self.running:  # Process only when running is True
             ret, frame = self.cap.read()
             if not ret:
@@ -43,6 +45,8 @@ class Processor:
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False  # Exit loop if 'q' is pressed
+
+        print("CV2: Video ends")
 
         # Cleanup OpenCV resources
         self.cap.release()
