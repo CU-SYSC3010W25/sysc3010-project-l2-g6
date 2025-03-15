@@ -72,27 +72,26 @@ class Camera:
         self.servoSpeed = 5
 
     def setServoAngle(self, angle):
-        """Move servo to a specific angle, ensuring accurate real-world alignment."""
-        
-        # 🔹 Adjust these values based on your servo's behavior
-        SERVO_MIN_DUTY = 2.5  # Duty cycle for -90° (9 o'clock)
-        SERVO_MAX_DUTY = 12.5 # Duty cycle for +90° (3 o'clock)
+        """Move servo to a specific angle, ensuring duty cycle maps to real-world servo position."""        
+        SERVO_MIN_DUTY = 2.5  # Duty cycle for lowest real-world angle (e.g., 6 o’clock left)
+        SERVO_MAX_DUTY = 12.5 # Duty cycle for highest real-world angle (e.g., 6 o’clock right)
 
-        # 🔹 Normalize angle within expected servo range
-        angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
+        adjusted_angle = (angle * config.SERVO_ANGLE_AMP) + config.SERVO_DEFAULT_ANGLE
 
-        # 🔹 Convert angle to correct PWM duty cycle
-        duty_cycle = ((angle - config.SERVO_MIN_ANGLE) / (config.SERVO_MAX_ANGLE - config.SERVO_MIN_ANGLE)) * (SERVO_MAX_DUTY - SERVO_MIN_DUTY) + SERVO_MIN_DUTY
+        adjusted_angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, adjusted_angle))
 
-        # 🔹 Move the servo
+        duty_cycle = ((adjusted_angle - config.SERVO_MIN_ANGLE) / 
+                    (config.SERVO_MAX_ANGLE - config.SERVO_MIN_ANGLE)) * \
+                    (SERVO_MAX_DUTY - SERVO_MIN_DUTY) + SERVO_MIN_DUTY
+
         GPIO.output(self.servoPin, True)
         self.servoPWM.ChangeDutyCycle(duty_cycle)
-        time.sleep(0.2)  # Small delay for smooth movement
+        time.sleep(0.2)  
         GPIO.output(self.servoPin, False)
         self.servoPWM.ChangeDutyCycle(0)
 
-        self.servoCurrentAngle = angle  # Store the new position
-        print(f"🔄 Servo moved to {angle}° (PWM: {duty_cycle}%)")
+        self.servoCurrentAngle = adjusted_angle 
+        print(f"🔄 Servo moved to {adjusted_angle}° (Real: {angle}°) | PWM: {duty_cycle}%")
 
 
     def moveServo(self, direction):
