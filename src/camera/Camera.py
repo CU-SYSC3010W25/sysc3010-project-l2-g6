@@ -54,19 +54,17 @@ class Camera:
     async def servoMovement(self):
         """Background task to move the servo continuously in the current direction."""
         while True:
-            if self.servoDirection != 0:
+            if self.servoDirection != 0 or (self.servoDirection == 1 and angle <= config.SERVO_MAX_ANGLE) or (self.servoDirection == -1 and angle >= config.SERVO_MIN_ANGLE):
                 # Calculate the new angle based on the direction and speed
                 angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
-
-                print(f"DEBUG: {angle}, {self.servoDirection}, {self.servoCurrentAngle}, {self.servoSpeed}")
                 
                 # Check if the new angle is within the limits
                 if self.servoDirection == 1 and angle <= config.SERVO_MAX_ANGLE:
-                    self.setServoAngle(angle)
+                    self.setServoAngle(angle * config.SERVO_ANGLE_AMP)
                 elif self.servoDirection == -1 and angle >= config.SERVO_MIN_ANGLE:
-                    self.setServoAngle(angle)
+                    self.setServoAngle(angle * config.SERVO_ANGLE_AMP)
                 
-                asyncio.sleep(0.1)
+                asyncio.sleep(1)
             
             # Small delay to avoid busy-waiting
             await asyncio.sleep(0.1)
@@ -96,7 +94,7 @@ class Camera:
         self.servoPWM = GPIO.PWM(self.servoPin, 50)
         self.servoPWM.start(0)
 
-        self.servoSpeed = 5
+        self.servoSpeed = 10
 
     def setServoAngle(self, angle):
         """
