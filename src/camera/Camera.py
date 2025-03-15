@@ -143,6 +143,8 @@ class Camera:
             print(f"Set servo angle to {value}")
         elif key == "ServoDirection":
             self.moveServo(value)
+        else:
+            print(f"Bad Key: {key} : {value}")
 
     
 
