@@ -11,5 +11,7 @@ SETTINGS = "settings/0"
 SERVO_DEFAULT_ANGLE = 0 #the default angle to start with 
 SERVO_MIN_ANGLE = -90 #lowest the servo should be able to go down
 SERVO_MAX_ANGLE = 90 #highest the servo should be able to go up
-SERVO_ANGLE_OFFSET = 10 #offset to add to the angle to for correction
 SERVO_ANGLE_AMP = -1 #multiplier for the servo angle for correction
+
+SERVO_MIN_DUTY = 2.5  #duty cycle for minimum angle 
+SERVO_MAX_DUTY = 12.5 #duty cycle for maximum angle

@@ -78,21 +78,16 @@ class Camera:
         Parameters:
             angle (float): The target angle in degrees. Positive values rotate clockwise,
                         negative values rotate counterclockwise, relative to the default position.
+            This is assuming the servo is positioned with the wires directly upward.
         """
-        # Servo duty cycle limits (PWM percentages)
-        SERVO_MIN_DUTY = 2.5  # Duty cycle for minimum angle (e.g., -90°)
-        SERVO_MAX_DUTY = 12.5 # Duty cycle for maximum angle (e.g., 90°)
 
-        # Adjust the target angle based on the default position and direction
         adjusted_angle = (angle * config.SERVO_ANGLE_AMP) + config.SERVO_DEFAULT_ANGLE
 
-        # Clamp the adjusted angle to the servo's physical limits
         clamped_angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, adjusted_angle))
 
-        # Map the clamped angle to the servo's duty cycle range
         duty_cycle = ((clamped_angle - config.SERVO_MIN_ANGLE) / 
                     (config.SERVO_MAX_ANGLE - config.SERVO_MIN_ANGLE)) * \
-                    (SERVO_MAX_DUTY - SERVO_MIN_DUTY) + SERVO_MIN_DUTY
+                    (config.SERVO_MAX_DUTY - config.SERVO_MIN_DUTY) + config.SERVO_MIN_DUTY
 
         # Apply the duty cycle to the servo
         GPIO.output(self.servoPin, True)
@@ -110,9 +105,9 @@ class Camera:
         """move servo in a direction"""
         match direction:
             case 1:
-                angle = min(self.servoCurrentAngle + self.servoSpeed, config.config.SERVO_MAX_ANGLE)
+                angle = min(self.servoCurrentAngle + self.servoSpeed, config.SERVO_MAX_ANGLE)
             case -1:
-                angle = max(self.servoCurrentAngle - self.servoSpeed, config.config.SERVO_MIN_ANGLE)
+                angle = max(self.servoCurrentAngle - self.servoSpeed, config.SERVO_MIN_ANGLE)
             case _:
                 return
             
