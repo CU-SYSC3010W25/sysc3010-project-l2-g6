@@ -72,26 +72,38 @@ class Camera:
         self.servoSpeed = 5
 
     def setServoAngle(self, angle):
-        """Move servo to a specific angle, ensuring duty cycle maps to real-world servo position."""        
-        SERVO_MIN_DUTY = 2.5  # Duty cycle for lowest real-world angle (e.g., 6 o’clock left)
-        SERVO_MAX_DUTY = 12.5 # Duty cycle for highest real-world angle (e.g., 6 o’clock right)
+        """
+        Move servo to a specific angle, ensuring duty cycle maps to real-world servo position.
+        
+        Parameters:
+            angle (float): The target angle in degrees. Positive values rotate clockwise,
+                        negative values rotate counterclockwise, relative to the default position.
+        """
+        # Servo duty cycle limits (PWM percentages)
+        SERVO_MIN_DUTY = 2.5  # Duty cycle for minimum angle (e.g., -90°)
+        SERVO_MAX_DUTY = 12.5 # Duty cycle for maximum angle (e.g., 90°)
 
+        # Adjust the target angle based on the default position and direction
         adjusted_angle = (angle * config.SERVO_ANGLE_AMP) + config.SERVO_DEFAULT_ANGLE
 
-        adjusted_angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, adjusted_angle))
+        # Clamp the adjusted angle to the servo's physical limits
+        clamped_angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, adjusted_angle))
 
-        duty_cycle = ((adjusted_angle - config.SERVO_MIN_ANGLE) / 
+        # Map the clamped angle to the servo's duty cycle range
+        duty_cycle = ((clamped_angle - config.SERVO_MIN_ANGLE) / 
                     (config.SERVO_MAX_ANGLE - config.SERVO_MIN_ANGLE)) * \
                     (SERVO_MAX_DUTY - SERVO_MIN_DUTY) + SERVO_MIN_DUTY
 
+        # Apply the duty cycle to the servo
         GPIO.output(self.servoPin, True)
         self.servoPWM.ChangeDutyCycle(duty_cycle)
-        time.sleep(0.2)  
+        time.sleep(0.2)  # Allow time for the servo to move
         GPIO.output(self.servoPin, False)
         self.servoPWM.ChangeDutyCycle(0)
 
-        self.servoCurrentAngle = adjusted_angle 
-        print(f"🔄 Servo moved to {adjusted_angle}° (Real: {angle}°) | PWM: {duty_cycle}%")
+        # Update the current angle and log the movement
+        self.servoCurrentAngle = clamped_angle
+        print(f"🔄 Servo moved to {clamped_angle}° (Requested: {angle}°) | PWM: {duty_cycle}%")
 
 
     def moveServo(self, direction):
