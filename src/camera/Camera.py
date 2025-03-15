@@ -57,6 +57,8 @@ class Camera:
             if self.servoDirection != 0:
                 # Calculate the new angle based on the direction and speed
                 angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
+
+                print(f"Angle to change to: {angle}")
                 
                 # Check if the new angle is within the limits
                 if self.servoDirection == 1 and angle <= config.SERVO_MAX_ANGLE:
