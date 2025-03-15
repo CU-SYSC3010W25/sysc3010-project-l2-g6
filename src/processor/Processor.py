@@ -27,26 +27,31 @@ class Processor:
         self.listenerThread.start()
 
     def processFrames(self):
+        """Process frames and stop cleanly when `self.running` is False."""
         self.cap = cv2.VideoCapture(config.GST_PIPELINE, cv2.CAP_GSTREAMER)
         if not self.cap.isOpened():
             print("Error: Unable to open video stream")
-            exit(-1)
-        self.running = True
-        while self.running:
+            return  # Exit safely
+
+        print("CV2: Video opened")
+
+        while self.running:  # Process only when running is True
             ret, frame = self.cap.read()
             if not ret:
                 print("Error: Unable to read frame")
                 break
 
-            # Display the frame
             cv2.imshow('Video Stream', frame)
 
-            # Exit on 'q' key press
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.running = False
+                self.running = False  # Exit loop if 'q' is pressed
 
+        print("CV2: Video ends")
+
+        # Cleanup OpenCV resources
         self.cap.release()
         cv2.destroyAllWindows()
+
                 
     def stream(self, enabled):
         if enabled:
@@ -54,12 +59,13 @@ class Processor:
                 self.running = True
                 self.processThread = threading.Thread(target=self.processFrames, daemon=True)
                 self.processThread.start()
-                print("Starting to process video")
+                print("✅ Starting video processing")
         else:
             if self.running:
-                self.running = False
+                print("⛔ Stopping video processing")
+                self.running = False  # Signal the loop to stop
                 if self.processThread:
-                    self.processThread.join()
-                print("Stopping video processing")
+                    self.processThread.join()  # Wait for the thread to finish
+                    self.processThread = None  # Reset thread reference
 
 
