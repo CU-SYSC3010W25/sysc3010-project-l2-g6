@@ -26,7 +26,7 @@ class Listener:
 
             if key == "Stream":
                 self.streamCallback(value)
-            elif key == "ServoAngle":
+            elif key == "ServoAngle" or key == "ServoDirection":
                 self.servoCallback(key, value)
 
         self.ref.listen(listener)

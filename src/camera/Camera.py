@@ -18,6 +18,7 @@ class Camera:
         self.servoCurrentAngle = config.SERVO_DEFAULT_ANGLE
         self.servoSpeed = 0
         self.servoDirection = 0
+        self.servoTask = None
 
         self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
         subprocess.run(['bash', self.IPScriptPath])  # Set IP address on startup
@@ -119,15 +120,15 @@ class Camera:
         """Move servo in a direction (1, -1, or 0)."""
         if direction == 0:
             # Stop the background task if direction is 0
-            if self.servo_task and not self.servo_task.done():
-                self.servo_task.cancel()
-            self.servo_direction = 0
+            if self.servoTask and not self.servoTask.done():
+                self.servoTask.cancel()
+            self.servoDirection = 0
         else:
             # Start or update the background task for continuous movement
             print(f"servo direction changed to {direction}")
-            self.servo_direction = direction
-            if not self.servo_task or self.servo_task.done():
-                self.servo_task = asyncio.create_task(self.servoMovement())
+            self.servoDirection = direction
+            if not self.servoTask or self.servoTask.done():
+                self.servoTask = asyncio.create_task(self.servoMovement())
 
 
 
