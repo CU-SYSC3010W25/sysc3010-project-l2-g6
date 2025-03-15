@@ -9,7 +9,7 @@ from camera.Listener import Listener
 
 class Camera:
     def __init__(self):
-        self.listener = Listener(self.stream)
+        self.listener = Listener(self.stream, self.servoUpdate)
         self.process = None
         self.running = False
 
@@ -20,6 +20,7 @@ class Camera:
 
         self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
         subprocess.run(['bash', self.IPScriptPath])  # Set IP address on startup
+        self.initializeServo()
 
     async def run(self):
         """Starts both the camera and Firebase listener asynchronously."""
@@ -40,11 +41,6 @@ class Camera:
                 self.stopCamera()
 
             await asyncio.sleep(1)  # Sleep briefly before rechecking
-
-    def stream(self, enabled):
-        """Callback function to enable/disable the camera."""
-        self.running = enabled
-        print(f"🔥 Camera {'enabled' if enabled else 'disabled'}")
 
     def stopCamera(self):
         """Stops the camera stream and ensures preview is closed."""
@@ -73,11 +69,41 @@ class Camera:
         self.servoPWM = GPIO.PWM(self.servoPin, 50)
         self.servoPWM.start(0)
 
-        self.servoSpeed = 25
+        self.servoSpeed = 5
 
     def setServoAngle(self, angle):
-        pass
+        """move servo to a set angle"""
+        angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
+        duty_cycle = (angle / 18) + 2
+        GPIO.output(self.servoPin, True)
+        self.servoPWM.ChangeDutyCycle(duty_cycle)
+        time.sleep(0.2)
+        GPIO.output(self.servoPin, False)
+        self.servoPWM.ChangeDutyCycle(0)
+        self.servoCurrentAngle = angle
 
-    def moveServo(self, rotation):
-        pass
+    def moveServo(self, direction):
+        """move servo in a direction"""
+        match direction:
+            case 1:
+                angle = min(self.servoCurrentAngle + self.servoSpeed, config.SERVO_MAX_ANGLE)
+            case -1:
+                angle = max(self.servoCurrentAngle - self.servoSpeed, config.SERVO_MIN_ANGLE)
+            case _:
+                return
+            
+        self.setServoAngle(angle)
 
+
+    #callback functions
+    def stream(self, enabled): 
+        """Callback function to enable/disable the camera."""
+        self.running = enabled
+        print(f"🔥 Camera {'enabled' if enabled else 'disabled'}")
+
+    def servoUpdate(self, key, value):
+        if key == "ServoAngle":
+            self.setServoAngle(value)
+            print(f"Set servo angle to {value}")
+        elif key == "ServoDirection":
+            self.moveServo(value)

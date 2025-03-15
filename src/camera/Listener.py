@@ -4,8 +4,9 @@ from firebase_admin import credentials, db
 from camera import config
 
 class Listener:
-    def __init__(self, streamCallback):
+    def __init__(self, streamCallback, servoCallback):
         self.streamCallback = streamCallback
+        self.servoCallback = servoCallback
 
         self.ref = None
         self.cred = None
@@ -18,13 +19,15 @@ class Listener:
     def getSettings(self):
         self.ref = db.reference(config.SETTINGS)
 
-        def streamListener(event):
+        def listener(event):
             key = event.path.lstrip('/')
             value = event.data
             print(f"Firebase event received: {key}: {value}")
 
             if key == "Stream":
                 self.streamCallback(value)
+            elif key == "ServoAngle":
+                self.servoCallback(key, value)
 
-        self.ref.listen(streamListener)
+        self.ref.listen(listener)
 
