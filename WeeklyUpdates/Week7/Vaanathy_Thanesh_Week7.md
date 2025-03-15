@@ -1,6 +1,6 @@
 ## Weekly Individual Project Update Report
 ### Group number: L2-G6
-### Student name: Divya Dushyanthan
+### Student name: Vaanathy Thaneskumar
 ### Week: Week 7
 1. **How many hours did you spend on the project this week? (0-10)** 
 4 hours
