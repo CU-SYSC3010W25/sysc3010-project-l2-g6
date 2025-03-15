@@ -57,16 +57,15 @@ class Camera:
             if self.servoDirection != 0:
                 # Calculate the new angle based on the direction and speed
                 angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
-                angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
                 
-                # Move the servo to the new angle
-                self.setServoAngle(angle)
-                
-                # Small delay to allow the servo to move smoothly
-                await asyncio.sleep(0.1)
-            else:
-                # If direction is 0, stop the task
-                break
+                # Check if the new angle is within the limits
+                if self.servoDirection == 1 and angle <= config.SERVO_MAX_ANGLE:
+                    self.setServoAngle(angle)
+                elif self.servoDirection == -1 and angle >= config.SERVO_MIN_ANGLE:
+                    self.setServoAngle(angle)
+            
+            # Small delay to avoid busy-waiting
+            await asyncio.sleep(0.1)
 
 
 
@@ -126,20 +125,9 @@ class Camera:
 
 
     def moveServo(self, direction):
-        """Move servo in a direction (1, -1, or 0)."""
-        if direction == 0:
-            # Stop the background task if direction is 0
-            if self.servoTask and not self.servoTask.done():
-                self.servoTask.cancel()  # Cancel the running task
-                self.servoTask = None  # Clear the task reference
-            self.servoDirection = 0  # Update the direction
-        else:
-            # Start or update the background task for continuous movement
-            print(f"Servo direction changed to {direction}")
-            self.servoDirection = direction  # Update the direction
-            if not self.servoTask or self.servoTask.done():
-                # Create a new task if one isn't already running
-                self.servoTask = asyncio.create_task(self.servoMovement())
+        """Update the servo direction (1, -1, or 0)."""
+        print(f"Servo direction changed to {direction}")
+        self.servoDirection = direction
 
 
 
