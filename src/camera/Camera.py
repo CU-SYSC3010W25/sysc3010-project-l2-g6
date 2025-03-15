@@ -72,24 +72,36 @@ class Camera:
         self.servoSpeed = 5
 
     def setServoAngle(self, angle):
-        """move servo to a set angle"""
-        true_angle = (angle * config.SERVO_ANGLE_AMP) + config.SERVO_ANGLE_OFFSET
-        angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, true_angle))
-        duty_cycle = ((angle + config.SERVO_MAX_ANGLE) / 18) + 2
+        """Move servo to a specific angle, ensuring accurate real-world alignment."""
+        
+        # 🔹 Adjust these values based on your servo's behavior
+        SERVO_MIN_DUTY = 2.5  # Duty cycle for -90° (9 o'clock)
+        SERVO_MAX_DUTY = 12.5 # Duty cycle for +90° (3 o'clock)
+
+        # 🔹 Normalize angle within expected servo range
+        angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
+
+        # 🔹 Convert angle to correct PWM duty cycle
+        duty_cycle = ((angle - config.SERVO_MIN_ANGLE) / (config.SERVO_MAX_ANGLE - config.SERVO_MIN_ANGLE)) * (SERVO_MAX_DUTY - SERVO_MIN_DUTY) + SERVO_MIN_DUTY
+
+        # 🔹 Move the servo
         GPIO.output(self.servoPin, True)
         self.servoPWM.ChangeDutyCycle(duty_cycle)
-        time.sleep(0.2)
+        time.sleep(0.2)  # Small delay for smooth movement
         GPIO.output(self.servoPin, False)
         self.servoPWM.ChangeDutyCycle(0)
-        self.servoCurrentAngle = angle
+
+        self.servoCurrentAngle = angle  # Store the new position
+        print(f"🔄 Servo moved to {angle}° (PWM: {duty_cycle}%)")
+
 
     def moveServo(self, direction):
         """move servo in a direction"""
         match direction:
             case 1:
-                angle = min(self.servoCurrentAngle + self.servoSpeed, config.SERVO_MAX_ANGLE)
+                angle = min(self.servoCurrentAngle + self.servoSpeed, config.config.SERVO_MAX_ANGLE)
             case -1:
-                angle = max(self.servoCurrentAngle - self.servoSpeed, config.SERVO_MIN_ANGLE)
+                angle = max(self.servoCurrentAngle - self.servoSpeed, config.config.SERVO_MIN_ANGLE)
             case _:
                 return
             
