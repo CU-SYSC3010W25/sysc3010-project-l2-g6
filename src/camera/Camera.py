@@ -15,7 +15,7 @@ class Camera:
 
         self.servoPin = None
         self.servoPWM = None
-        self.servoCurrentAngle = 0
+        self.servoCurrentAngle = config.SERVO_DEFAULT_ANGLE
         self.servoSpeed = 0
 
         self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
@@ -74,7 +74,7 @@ class Camera:
     def setServoAngle(self, angle):
         """move servo to a set angle"""
         angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
-        duty_cycle = (angle / 18) + 2
+        duty_cycle = ((angle + config.SERVO_MAX_ANGLE) / 18) + 2
         GPIO.output(self.servoPin, True)
         self.servoPWM.ChangeDutyCycle(duty_cycle)
         time.sleep(0.2)

@@ -8,5 +8,6 @@ FB_URL = {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebasei
 
 SETTINGS = "settings/0"
 
+SERVO_DEFAULT_ANGLE = 0
 SERVO_MIN_ANGLE = -80
 SERVO_MAX_ANGLE = 80
