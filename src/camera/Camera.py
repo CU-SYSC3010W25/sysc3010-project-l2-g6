@@ -29,11 +29,12 @@ class Camera:
     async def run(self):
         """Starts both the camera and Firebase listener asynchronously."""
         await asyncio.gather(
-            self.listen_for_changes(),  # Run Firebase listener
-            self.start_stream()  # Run camera stream
+            self.settingsListen(),  # Run Firebase listener
+            self.startStream(),  # Run camera stream
+            self.servoMovement()
         )
 
-    async def start_stream(self):
+    async def startStream(self):
         """Manages video streaming, allowing it to be dynamically turned on/off."""
         while True:
             if self.running and self.process is None:
@@ -46,21 +47,26 @@ class Camera:
 
             await asyncio.sleep(1)  # Sleep briefly before rechecking
 
-    async def listen_for_changes(self):
+    async def settingsListen(self):
         """Runs the Firebase listener asynchronously."""
         await asyncio.to_thread(self.listener.getSettings)
 
     async def servoMovement(self):
         """Background task to move the servo continuously in the current direction."""
-        try:
-            while self.servoDirection != 0:
+        while True:
+            if self.servoDirection != 0:
+                # Calculate the new angle based on the direction and speed
                 angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
                 angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
+                
+                # Move the servo to the new angle
                 self.setServoAngle(angle)
-                await asyncio.sleep(0.1)  # Adjust sleep time for smoother movement
-        except asyncio.CancelledError:
-            # Handle task cancellation gracefully
-            print("Servo movement task cancelled.")
+                
+                # Small delay to allow the servo to move smoothly
+                await asyncio.sleep(0.1)
+            else:
+                # If direction is 0, wait briefly before checking again
+                await asyncio.sleep(0.1)
 
 
 
