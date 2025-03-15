@@ -8,6 +8,8 @@ FB_URL = {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebasei
 
 SETTINGS = "settings/0"
 
-SERVO_DEFAULT_ANGLE = 0
-SERVO_MIN_ANGLE = -80
-SERVO_MAX_ANGLE = 80
+SERVO_DEFAULT_ANGLE = 0 #the default angle to start with 
+SERVO_MIN_ANGLE = -80 #lowest the servo should be able to go down
+SERVO_MAX_ANGLE = 80 #highest the servo should be able to go up
+SERVO_ANGLE_OFFSET = 10 #offset to add to the angle to for correction
+SERVO_ANGLE_AMP = -1 #multiplier for the servo angle for correction

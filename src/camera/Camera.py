@@ -73,7 +73,8 @@ class Camera:
 
     def setServoAngle(self, angle):
         """move servo to a set angle"""
-        angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
+        true_angle = (angle * config.SERVO_ANGLE_AMP) + config.SERVO_ANGLE_OFFSET
+        angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, true_angle))
         duty_cycle = ((angle + config.SERVO_MAX_ANGLE) / 18) + 2
         GPIO.output(self.servoPin, True)
         self.servoPWM.ChangeDutyCycle(duty_cycle)
