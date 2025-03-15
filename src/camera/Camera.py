@@ -124,6 +124,7 @@ class Camera:
             self.servo_direction = 0
         else:
             # Start or update the background task for continuous movement
+            print(f"servo direction changed to {direction}")
             self.servo_direction = direction
             if not self.servo_task or self.servo_task.done():
                 self.servo_task = asyncio.create_task(self.servoMovement())
