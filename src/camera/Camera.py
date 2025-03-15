@@ -65,9 +65,8 @@ class Camera:
                 # Small delay to allow the servo to move smoothly
                 await asyncio.sleep(0.1)
             else:
-                # If direction is 0, wait briefly before checking again
-                await asyncio.sleep(0.1)
-
+                # If direction is 0, stop the task
+                break
 
 
 
