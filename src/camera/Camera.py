@@ -52,11 +52,15 @@ class Camera:
 
     async def servoMovement(self):
         """Background task to move the servo continuously in the current direction."""
-        while self.servoDirection != 0:
-            angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
-            angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
-            self.setServoAngle(angle)
-            await asyncio.sleep(0.1)  # Adjust sleep time for smoother movement
+        try:
+            while self.servoDirection != 0:
+                angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
+                angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
+                self.setServoAngle(angle)
+                await asyncio.sleep(0.1)  # Adjust sleep time for smoother movement
+        except asyncio.CancelledError:
+            # Handle task cancellation gracefully
+            print("Servo movement task cancelled.")
 
 
 
@@ -121,13 +125,15 @@ class Camera:
         if direction == 0:
             # Stop the background task if direction is 0
             if self.servoTask and not self.servoTask.done():
-                self.servoTask.cancel()
-            self.servoDirection = 0
+                self.servoTask.cancel()  # Cancel the running task
+                self.servoTask = None  # Clear the task reference
+            self.servoDirection = 0  # Update the direction
         else:
             # Start or update the background task for continuous movement
-            print(f"servo direction changed to {direction}")
-            self.servoDirection = direction
+            print(f"Servo direction changed to {direction}")
+            self.servoDirection = direction  # Update the direction
             if not self.servoTask or self.servoTask.done():
+                # Create a new task if one isn't already running
                 self.servoTask = asyncio.create_task(self.servoMovement())
 
 
