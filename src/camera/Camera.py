@@ -30,8 +30,7 @@ class Camera:
 
             elif not self.running and self.process:
                 print("⛔ Stopping Camera Stream...")
-                self.process.terminate()
-                self.process = None
+                self.stopCamera()
 
             await asyncio.sleep(1)  # Sleep briefly before rechecking
 
@@ -39,6 +38,17 @@ class Camera:
         """Callback function to enable/disable the camera."""
         self.running = enabled
         print(f"🔥 Camera {'enabled' if enabled else 'disabled'}")
+
+    def stopCamera(self):
+        """Stops the camera stream and ensures preview is closed."""
+        print("⛔ Stopping Camera Stream...")
+        self.process.terminate()
+        self.process.wait()  # Ensure process is fully stopped
+        self.process = None
+
+        # Kill any leftover preview windows
+        subprocess.run("pkill -f libcamera-vid", shell=True)
+
 
     async def listen_for_changes(self):
         """Runs the Firebase listener asynchronously."""
