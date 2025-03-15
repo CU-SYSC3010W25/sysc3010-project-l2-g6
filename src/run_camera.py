@@ -1,20 +1,8 @@
-from camera.Camera import Camera
 import asyncio
-
-async def listener():
-    print ("Listener: Starting...")
-    Camera().listen()
-    print (("Listener: Done"))
-
-async def run_camera():
-    print ("Camera: Starting...")
-    Camera().runCamera()
-    print ("Camera: Done")
+from camera.Camera import Camera
 
 async def main():
-    await asyncio.gather(
-        listener(),
-        run_camera()
-    )
+    camera = Camera()
+    await camera.run()  # Camera handles async internally
 
 asyncio.run(main())
