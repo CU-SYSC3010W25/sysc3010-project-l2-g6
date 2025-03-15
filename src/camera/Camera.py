@@ -55,16 +55,21 @@ class Camera:
         """Background task to move the servo continuously in the current direction."""
         while True:
             if self.servoDirection != 0:
-                # Calculate the new angle based on the direction and speed
-                angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
-
-                print(f"Angle to change to: {angle}")
+                # Calculate the new duty cycle increment based on the direction and speed
+                duty_increment = (self.servoDirection * self.servoSpeed) / (config.SERVO_MAX_ANGLE - config.SERVO_MIN_ANGLE) * (config.SERVO_MAX_DUTY - config.SERVO_MIN_DUTY)
                 
-                # Check if the new angle is within the limits
-                if self.servoDirection == 1 and angle <= config.SERVO_MAX_ANGLE:
-                    self.setServoAngle(angle)
-                elif self.servoDirection == -1 and angle >= config.SERVO_MIN_ANGLE:
-                    self.setServoAngle(angle)
+                # Calculate the new duty cycle
+                new_duty_cycle = self.servoPWM.get_duty_cycle() + duty_increment
+                
+                # Clamp the duty cycle to the servo's limits
+                new_duty_cycle = max(config.SERVO_MIN_DUTY, min(config.SERVO_MAX_DUTY, new_duty_cycle))
+                
+                # Apply the new duty cycle to the servo
+                GPIO.output(self.servoPin, True)
+                self.servoPWM.ChangeDutyCycle(new_duty_cycle)
+                time.sleep(0.02)  # Small delay to allow the servo to respond
+                GPIO.output(self.servoPin, False)
+                self.servoPWM.ChangeDutyCycle(0)
             
             # Small delay to avoid busy-waiting
             await asyncio.sleep(0.1)
