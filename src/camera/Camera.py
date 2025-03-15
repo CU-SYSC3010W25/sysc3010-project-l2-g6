@@ -17,11 +17,14 @@ class Camera:
         self.servoPWM = None
         self.servoCurrentAngle = config.SERVO_DEFAULT_ANGLE
         self.servoSpeed = 0
+        self.servoDirection = 0
 
         self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
         subprocess.run(['bash', self.IPScriptPath])  # Set IP address on startup
         self.initializeServo()
 
+
+    #asynchronous functions
     async def run(self):
         """Starts both the camera and Firebase listener asynchronously."""
         await asyncio.gather(
@@ -42,6 +45,22 @@ class Camera:
 
             await asyncio.sleep(1)  # Sleep briefly before rechecking
 
+    async def listen_for_changes(self):
+        """Runs the Firebase listener asynchronously."""
+        await asyncio.to_thread(self.listener.getSettings)
+
+    async def servoMovement(self):
+        """Background task to move the servo continuously in the current direction."""
+        while self.servoDirection != 0:
+            angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed)
+            angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, angle))
+            self.setServoAngle(angle)
+            await asyncio.sleep(0.1)  # Adjust sleep time for smoother movement
+
+
+
+
+    #camera functions
     def stopCamera(self):
         """Stops the camera stream and ensures preview is closed."""
         print("⛔ Stopping Camera Stream...")
@@ -51,11 +70,6 @@ class Camera:
 
         # Kill any leftover preview windows
         subprocess.run("pkill -f libcamera-vid", shell=True)
-
-
-    async def listen_for_changes(self):
-        """Runs the Firebase listener asynchronously."""
-        await asyncio.to_thread(self.listener.getSettings)
 
 
 
@@ -102,16 +116,18 @@ class Camera:
 
 
     def moveServo(self, direction):
-        """move servo in a direction"""
-        match direction:
-            case 1:
-                angle = min(self.servoCurrentAngle + self.servoSpeed, config.SERVO_MAX_ANGLE)
-            case -1:
-                angle = max(self.servoCurrentAngle - self.servoSpeed, config.SERVO_MIN_ANGLE)
-            case _:
-                return
-            
-        self.setServoAngle(angle)
+        """Move servo in a direction (1, -1, or 0)."""
+        if direction == 0:
+            # Stop the background task if direction is 0
+            if self.servo_task and not self.servo_task.done():
+                self.servo_task.cancel()
+            self.servo_direction = 0
+        else:
+            # Start or update the background task for continuous movement
+            self.servo_direction = direction
+            if not self.servo_task or self.servo_task.done():
+                self.servo_task = asyncio.create_task(self.servoMovement())
+
 
 
     #callback functions
@@ -126,3 +142,6 @@ class Camera:
             print(f"Set servo angle to {value}")
         elif key == "ServoDirection":
             self.moveServo(value)
+
+    
+
