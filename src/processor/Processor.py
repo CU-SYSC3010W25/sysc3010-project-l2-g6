@@ -5,6 +5,7 @@ import subprocess
 
 from processor import config
 from processor.Listener import Listener
+from processor.Model import Model
 
 class Processor:
     def __init__(self):
