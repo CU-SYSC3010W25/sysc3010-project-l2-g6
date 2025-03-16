@@ -8,6 +8,11 @@ FB_URL = {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebasei
 
 SETTINGS = "settings/0"
 
+
+SERVO_GPIO_PIN = 18 #servos GPIO pin
+SERVO_FREQ = 50 #frequency in Hz for PWM
+SERVO_SPEED = 10 #number of degrees moved each period
+
 SERVO_DEFAULT_ANGLE = 0 #the default angle to start with 
 SERVO_MIN_ANGLE = -90 #lowest the servo should be able to go down
 SERVO_MAX_ANGLE = 90 #highest the servo should be able to go up

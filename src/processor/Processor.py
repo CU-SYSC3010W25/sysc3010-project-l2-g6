@@ -26,6 +26,8 @@ class Processor:
         self.processThread.start()
         self.listenerThread.start()
 
+
+    #thread functions
     def processFrames(self):
         """Process frames and stop cleanly when `self.running` is False."""
         self.cap = cv2.VideoCapture(config.GST_PIPELINE, cv2.CAP_GSTREAMER)
@@ -48,7 +50,6 @@ class Processor:
         self.cap.release()
         cv2.destroyAllWindows()
 
-                
     def stream(self, enabled):
         if enabled:
             if not self.running:
