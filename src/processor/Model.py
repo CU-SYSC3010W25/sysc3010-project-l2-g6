@@ -13,8 +13,13 @@ class Model:
 
     def prepareFrame(self, frame):
         frame = cv2.resize(frame, (self.imgSize, self.imgSize))
-        frame = np.expand_dims(frame, axis=0) / 255.0
-        return frame.astype(np.float32)
+
+        if self.inputType == np.uint8: 
+            frame = np.expand_dims(frame, axis=0).astype(np.uint8) 
+        else:  
+            frame = np.expand_dims(frame, axis=0).astype(np.float32) / 255.0
+
+        return frame
     
     def interpret(self, frame):
         inputData = self.prepareFrame(frame)
