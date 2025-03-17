@@ -4,7 +4,7 @@ GST_PIPELINE = (
     "rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink"
 )
 
-FB_CERT = "/home/kylemathias/Project/sysc3010-project-l2-g6/config/interprePi access key.json"
+FB_CERT = "/home/andrewrivera/sysc3010-project-l2-g6/config/interprePi access key.json"
 
 FB_URL = {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"}
 

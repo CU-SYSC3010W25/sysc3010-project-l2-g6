@@ -11,16 +11,16 @@ p.start(2.5) # Initialization
 def set_angle(angle):
     duty = angle / 18 + 2.5
     p.ChangeDutyCycle(duty)
-    time.sleep(0.5)
+    time.sleep(0.2)
     p.ChangeDutyCycle(0)  # Turn off the signal to avoid jitter
 
 try:
     while True:
-        #set_angle(0)
-        #time.sleep(1)
-        #set_angle(180)
-        #time.sleep(1)
+        set_angle(0)
+        time.sleep(1)
         set_angle(90)
+        time.sleep(1)
+        set_angle(180)
         time.sleep(1)
 
 except KeyboardInterrupt:
