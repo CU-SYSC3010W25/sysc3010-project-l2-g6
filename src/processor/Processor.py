@@ -2,6 +2,7 @@ import cv2
 import threading
 import os
 import subprocess
+import queue
 
 from processor import config
 from processor.Listener import Listener
@@ -11,8 +12,12 @@ class Processor:
     def __init__(self):
         self.cap = None
         self.running = False
+        self.frameQueue = queue.Queue(maxsize=1)
+
         self.processThread = None
         self.listenerThread = None
+        self.interpretThread = None
+        
 
         self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
         self.modelPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model.tflite")
@@ -25,8 +30,11 @@ class Processor:
     def createThreads(self):
         self.processThread = threading.Thread(target=self.processFrames)
         self.listenerThread = threading.Thread(target=self.listener.getSettings, daemon=True)
+        self.interpretThread = threading.Thread(target=self.runInterpret, daemon=True)
+
         self.processThread.start()
         self.listenerThread.start()
+        self.interpretThread.start()
 
 
     #thread functions
@@ -45,8 +53,8 @@ class Processor:
 
             cv2.imshow('Video Stream', frame)
 
-            letter = self.model.interpret(frame)
-            print(f"Interpreted Letter: {letter}")
+            if not self.frameQueue.full():
+                self.frameQueue.put(frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False  # Exit loop if 'q' is pressed
@@ -54,6 +62,24 @@ class Processor:
         # Cleanup OpenCV resources
         self.cap.release()
         cv2.destroyAllWindows()
+
+    def runInterpret(self):
+        frameCount = 0
+
+        while self.running:
+            if not self.frameQueue.get():
+                frame = self.frameQueue.get()
+                frameCount+= 1
+
+                if frameCount % config.FRAME_NUM == 0:
+                    letter = self.model.interpret(frame)
+
+                    if self.checkValidChar(letter):
+                        print(f"Interpreted Letter: {letter}")
+
+
+    def checkValidChar(self, letter):
+        return letter.isalnum() and letter.isascii()
 
     def stream(self, enabled):
         if enabled:

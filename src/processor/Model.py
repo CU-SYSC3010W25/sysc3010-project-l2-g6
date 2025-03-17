@@ -11,8 +11,13 @@ class Model:
         self.inputDetails = self.interpreter.get_input_details()
         self.outputDetails = self.interpreter.get_output_details()
 
+        self.inputType = self.inputDetails[0]["dtype"]
+        self.inputShape = self.inputDetails[0]["shape"]
+        self.imgHeight = self.inputShape[1]
+        self.imgWidth = self.inputShape[2]
+
     def prepareFrame(self, frame):
-        frame = cv2.resize(frame, (self.imgSize, self.imgSize))
+        frame = cv2.resize(frame, (self.imgWidth, self.imgHeight))
 
         if self.inputType == np.uint8: 
             frame = np.expand_dims(frame, axis=0).astype(np.uint8) 
