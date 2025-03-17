@@ -5,7 +5,7 @@ import cv2
 class Model:
     def __init__(self, modelPath, imgSize=64):
         self.imgSize = imgSize
-        self.interpreter = tflite.Interpreter(modelPath=modelPath)
+        self.interpreter = tflite.Interpreter(modelPath)
         self.interpreter.allocate_tensors()
 
         self.inputDetails = self.interpreter.get_input_details()

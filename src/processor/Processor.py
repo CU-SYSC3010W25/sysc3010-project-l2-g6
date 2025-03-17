@@ -14,9 +14,10 @@ class Processor:
         self.processThread = None
         self.listenerThread = None
 
-        self.listener = Listener(self.stream)
         self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
-
+        self.modelPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model.tflite")
+        self.listener = Listener(self.stream)
+        self.model = Model(self.modelPath) 
         self.createThreads()    
         
         subprocess.run(['bash', self.IPScriptPath])    
@@ -43,6 +44,9 @@ class Processor:
                 break
 
             cv2.imshow('Video Stream', frame)
+
+            letter = self.model.interpret(frame)
+            print(f"Interpreted Letter: {letter}")
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False  # Exit loop if 'q' is pressed
