@@ -1,8 +1,8 @@
+import asyncio
 from camera.Camera import Camera
 
-def main():
+async def main():
     camera = Camera()
-    camera.runCamera()
+    await camera.run()  # Camera handles async internally
 
-if __name__ == "__main__":
-    main()
+asyncio.run(main())

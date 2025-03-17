@@ -7,3 +7,5 @@ __pycache__/
 venv/
 .env/
 EndToEndDemo/p1__camera.py
+./andrew/venv/
+

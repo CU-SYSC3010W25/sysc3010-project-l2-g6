@@ -23,18 +23,12 @@ def set_angle(angle):
 
 try:
     while True:
-        if (movUp){
-            set_angle(180)
-            moveUp = false
-            time.sleep(1)
-        }
-        else if (moveDown){
-            set_angle(0)
-            moveDown = false
-            time.sleep(1)
-        }
-
-
+        #set_angle(0)
+        #time.sleep(1)
+        #set_angle(180)
+        #time.sleep(1)
+        set_angle(90)
+        time.sleep(1)
 except KeyboardInterrupt:
     pass
 finally:
