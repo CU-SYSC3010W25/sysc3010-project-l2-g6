@@ -34,5 +34,5 @@ class Model:
 
         classIndex = np.argmax(outputData)
         letter = chr(classIndex + 65)
-        return letter
+        return classIndex
 

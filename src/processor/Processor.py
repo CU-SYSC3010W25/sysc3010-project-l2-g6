@@ -12,7 +12,6 @@ class Processor:
     def __init__(self):
         self.cap = None
         self.running = False
-        self.frameQueue = queue.Queue(maxsize=1)
 
         self.processThread = None
         self.listenerThread = None
@@ -44,6 +43,8 @@ class Processor:
         if not self.cap.isOpened():
             print("Error: Unable to open video stream")
             return  # Exit safely
+        
+        frameCount = 0
 
         while self.running:  # Process only when running is True
             ret, frame = self.cap.read()
@@ -53,8 +54,13 @@ class Processor:
 
             cv2.imshow('Video Stream', frame)
 
-            if not self.frameQueue.full():
-                self.frameQueue.put(frame)
+            frameCount += 1
+
+            if frameCount % config.FRAME_NUM == 0:
+                letter = self.model.interpret(frame)
+
+                if self.checkValidChar(letter):
+                    print(f"Interpreted Letter: {letter}")
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False  # Exit loop if 'q' is pressed
@@ -67,8 +73,8 @@ class Processor:
         frameCount = 0
 
         while self.running:
-            if not self.frameQueue.get():
-                frame = self.frameQueue.get()
+            try:
+                frame = self.frameQueue.get(timeout=1)
                 frameCount+= 1
 
                 if frameCount % config.FRAME_NUM == 0:
@@ -76,10 +82,14 @@ class Processor:
 
                     if self.checkValidChar(letter):
                         print(f"Interpreted Letter: {letter}")
+                    else:
+                        print(f"Invalid Letter: {letter}")
+            except queue.Empty:
+                continue
 
 
     def checkValidChar(self, letter):
-        return letter.isalnum() and letter.isascii()
+        return letter.isalpha() and letter.isascii() and letter.lower() == letter
 
     def stream(self, enabled):
         if enabled:
