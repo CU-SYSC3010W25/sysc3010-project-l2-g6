@@ -9,3 +9,5 @@ FB_CERT = "/home/andrewrivera/sysc3010-project-l2-g6/config/interprePi access ke
 FB_URL = {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"}
 
 SETTINGS = "settings/1"
+
+FRAME_NUM = 1
