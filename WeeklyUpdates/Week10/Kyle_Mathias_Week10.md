@@ -4,18 +4,18 @@
 
 ### Student name: Kyle Mathias
 
-### Week: Week 9
+### Week: Week 10
 
-1. **How many hours did you spend on the project this week?** 10
+1. **How many hours did you spend on the project this week?** 9
 
 2. ***Give rough breakdown of hours spent on 1-3 of the following:* (meetings, information gathering, design, research, brainstorming, evaluating options, prototyping options, writing/documenting, refactoring, testing, software implementation, hardware implementation)***
 
-- Top item: Group working on project: 6 hours
-- Next item: Individual working on project: 4 hours
+- Top item: Group working on project: 4 hours
+- Next item: Individual working on project: 5 hours
 
 3. **What did you accomplish this week? (Be specific)**
 - Group met up to work on project, making more progress on individual nodes, and completing progress for the week, and debugging.
-- Individually spent some time debugging and making sure inputs and outputs of node works.
+- Individually spent some time working on model to get output.
 
 4. **How do you feel about your progress? (brief, free-form reflection)**
 - Very good progress was made this week, the AI is kind of interpreting the signs but not completely.
