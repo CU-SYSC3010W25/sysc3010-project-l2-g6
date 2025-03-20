@@ -49,21 +49,13 @@ class Camera:
 
     async def servoMovement(self): #move servo continuously in a direction until min/max value hit
         while True: #only enter block if the servo direction isnt 0 and the angle is within the min and max in that direction
-            if self.servoDirection != 0 or (self.servoDirection == 1 and angle <= config.SERVO_MAX_ANGLE) or (self.servoDirection == -1 and angle >= config.SERVO_MIN_ANGLE):
-                angle = self.servoCurrentAngle + (self.servoDirection * self.servoSpeed) #calculate the angle
-                
-                #set the angle adjustment as long as its within the limits
-                if self.servoDirection == 1 and angle <= config.SERVO_MAX_ANGLE:
-                    self.setServoAngle(angle * config.SERVO_ANGLE_AMP)
-                elif self.servoDirection == -1 and angle >= config.SERVO_MIN_ANGLE:
-                    self.setServoAngle(angle * config.SERVO_ANGLE_AMP)
-                
-                await asyncio.sleep(1) #sleep
+            if (self.servoDirection == 1):
+                angle = self.servoCurrentAngle + 15
+                self.setServoAngle(angle)
+            elif(self.servoDirection == -1):
+                angle = self.servoCurrentAngle - 15
+                self.setServoAngle(angle)
             
-            await asyncio.sleep(0.1) #sleep
-
-
-
     #camera functions
     def stopCamera(self): #stop the camera stream
         self.process.terminate() #kill the process
@@ -83,25 +75,19 @@ class Camera:
         self.servoPWM = GPIO.PWM(self.servoPin, config.SERVO_FREQ) #set the pulse width modulation with the frequency for pin 18
         self.servoPWM.start(0) #start the PWM
 
-        self.servoSpeed = config.SERVO_SPEED #set the servo speed
-
     def setServoAngle(self, angle: float): #moves the servo to an angle within the min and max limits
-        adjusted_angle = (angle * config.SERVO_ANGLE_AMP) + config.SERVO_DEFAULT_ANGLE #adjust the angle using the offset and amplifier
-        clamped_angle = max(config.SERVO_MIN_ANGLE, min(config.SERVO_MAX_ANGLE, adjusted_angle)) #make sure the angle stays within the limits
-        duty_cycle = ((clamped_angle - config.SERVO_MIN_ANGLE) / 
-                    (config.SERVO_MAX_ANGLE - config.SERVO_MIN_ANGLE)) * \
-                    (config.SERVO_MAX_DUTY - config.SERVO_MIN_DUTY) + config.SERVO_MIN_DUTY #calculate the duty cycle of the angle
-
-        #apply duty cycle to the servo to move
-        GPIO.output(self.servoPin, True)
-        self.servoPWM.ChangeDutyCycle(duty_cycle)
-        time.sleep(0.2) 
-        GPIO.output(self.servoPin, False)
-        self.servoPWM.ChangeDutyCycle(0)
-
-        #update the internal current angle
-        self.servoCurrentAngle = clamped_angle
-        print(f"Servo moved to {clamped_angle}°")
+        if (angle < 0):
+            angle = 0
+        elif(angle > 180):
+            angle = 180
+           
+        duty = angle / 18 + 2.5
+        self.ChangeDutyCycle(duty)
+        time.sleep(0.25)
+        self.ChangeDutyCycle(0)  # Turn off the signal to avoid jitter
+        time.sleep(1)
+        
+        print(f"Servo moved to {angle}°")
 
     def moveServo(self, direction): #function to continuously move the servo in a direction
         print(f"Servo direction changed to {direction}")
@@ -120,7 +106,5 @@ class Camera:
             print(f"Set servo angle to {value}")
         elif key == "ServoDirection": #if its a direction then call moveServo
             self.moveServo(value)
-
-
     
 
