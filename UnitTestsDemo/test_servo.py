@@ -40,7 +40,6 @@ def set_angle(sig, angle):
     sig.ChangeDutyCycle(duty)
     time.sleep(0.25)
     sig.ChangeDutyCycle(0)  # Turn off the signal to avoid jitter
-
     time.sleep(1)
 
     return angle
@@ -52,7 +51,7 @@ class TestServoFunctions(unittest.TestCase):
         print ("----------------------------")
 
         self.assertEqual(initialize_pin(), SERVO_PIN)
-        time.sleep(1)
+        
         
         
     def test_minimum_duty(self):
@@ -60,14 +59,14 @@ class TestServoFunctions(unittest.TestCase):
         print ("-Checking minimum duty value-")
         print ("----------------------------")
         self.assertEqual(minimum_duty(), MIN_DUTY)
-        time.sleep(1)
+       
         
     def test_maximum_duty(self):
         print ("----------------------------")
         print ("-Checking maximum duty value-")
         print ("----------------------------")
         self.assertEqual(maximum_duty(), MAX_DUTY)
-        time.sleep(1)
+        
         
     # Testing different angles
     def test_default(self):
@@ -79,7 +78,8 @@ class TestServoFunctions(unittest.TestCase):
         sig = initialize_servo(pin, duty)
         
         angle = 90
-        self.assertEqual(set_angle(sig, angle), DEFAULT_ANGLE)
+        angle = set_angle(sig, angle)
+        self.assertEqual(angle, DEFAULT_ANGLE)
         
     
     def test_max(self):
@@ -92,7 +92,8 @@ class TestServoFunctions(unittest.TestCase):
         sig = initialize_servo(pin, duty)
         
         angle = 180
-        self.assertEqual(set_angle(sig, angle), MAX_ANGLE)
+        angle = set_angle(sig, angle)
+        self.assertEqual(angle, MAX_ANGLE)
         
     
     def test_min(self):
@@ -104,7 +105,8 @@ class TestServoFunctions(unittest.TestCase):
         print ("----------------------------")
         
         angle = 0
-        self.assertEqual(set_angle(sig, angle), MIN_ANGLE)
+        angle = set_angle(sig, angle)
+        self.assertEqual(angle, MIN_ANGLE)
         
         
     def test_quarter(self):
@@ -116,7 +118,8 @@ class TestServoFunctions(unittest.TestCase):
         sig = initialize_servo(pin, duty)
         
         angle = 45
-        self.assertEqual(set_angle(sig, angle), angle)
+        angle = set_angle(sig, angle)
+        self.assertEqual(angle, angle)
         
         
     def test_third(self):
@@ -128,7 +131,8 @@ class TestServoFunctions(unittest.TestCase):
         sig = initialize_servo(pin, duty)
         
         angle = 135
-        self.assertEqual(set_angle(sig, angle), angle)
+        angle = set_angle(sig, angle)
+        self.assertEqual(angle, angle)
         
     
     def test_negative(self):
@@ -140,7 +144,8 @@ class TestServoFunctions(unittest.TestCase):
         sig = initialize_servo(pin, duty)
         
         angle = -90
-        self.assertEqual(set_angle(sig, angle), MIN_ANGLE)
+        angle = set_angle(sig, angle)
+        self.assertEqual(angle, MIN_ANGLE)
         
     
     def test_out_of_range(self):
@@ -152,7 +157,8 @@ class TestServoFunctions(unittest.TestCase):
         sig = initialize_servo(pin, duty)
         
         angle = 270
-        self.assertEqual(set_angle(sig, angle), MAX_ANGLE)
+        angle = set_angle(sig, angle)
+        self.assertEqual(angle, MAX_ANGLE)
 
     
     
