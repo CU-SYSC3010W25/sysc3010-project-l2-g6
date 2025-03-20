@@ -12,7 +12,7 @@ def grab_ip():
 
 def add_ip():
     ip = grab_ip()
-    if ("172.24.156.196" in ip) and ("192.168.1.101" not in ip):
+    if ("172.17.142.144" in ip) and ("192.168.1.101" not in ip):
         add_ip_cmd = (['sudo', 'ip', 'addr', 'add', '192.168.1.101/24', 'dev', 'eth0'])
         result = subprocess.run(add_ip_cmd, capture_output=True, text=True)
         out = result.stdout
@@ -40,13 +40,17 @@ def ping_pi():
         result = subprocess.run(ping_cmd, capture_output=True, text=True)
         out = result.stdout
         print(out)
-        return "0% packet loss" in out  # Check if ping was successful
+        if "Unreachable" in out:
+            return False
+        return True  # Check if ping was successful
     elif("192.168.1.102" in ip):
         ping_cmd = (['ping', '-c', '4', '192.168.1.101'])  # Ping 4 times
         result = subprocess.run(ping_cmd, capture_output=True, text=True)
         out = result.stdout
         print(out)
-        return "0% packet loss" in out  # Check if ping was successful
+        if "Unreachable" in out:
+            return False
+        return True  # Check if ping was successful
 
     return False
 

@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src import Camera
+from camera import Camera
 
 class TestCamera(unittest.TestCase):
 
