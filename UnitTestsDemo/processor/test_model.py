@@ -3,6 +3,13 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.keras.preprocessing import image
 
+"""
+Class indices: {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 
+'I': 8, 'J': 9, 'K': 10, 'L': 11, 'M': 12, 'N': 13, 'O': 14, 'P': 15, 'Q': 16, 
+'R': 17, 'S': 18, 'T': 19, 'U': 20, 'V': 21, 'W': 22, 'X': 23, 'Y': 24, 'Z': 25, 
+'del': 26, 'nothing': 27, 'space': 28}
+"""
+
 class TestModel:
     def __init__(self, images_name: str, model_name: str):
         # Get absolute paths to the images folder and model file
@@ -14,7 +21,7 @@ class TestModel:
 
     def run_tests(self):
         # List of expected classes (A-Z, nothing, space, del)
-        expected_classes = [chr(i) for i in range(ord('A'), ord('Z') + 1)] + ['nothing', 'space', 'del']
+        expected_classes = [chr(i) for i in range(ord('A'), ord('Z') + 1)] + ['del', 'nothing', 'space']
 
         # Track test results
         total_tests = 0
