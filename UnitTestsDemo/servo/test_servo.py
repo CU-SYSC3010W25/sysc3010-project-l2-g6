@@ -40,7 +40,7 @@ def set_angle(sig, angle):
     sig.ChangeDutyCycle(duty)
     time.sleep(0.25)
     sig.ChangeDutyCycle(0)  # Turn off the signal to avoid jitter
-    time.sleep(1)
+    time.sleep(2)
 
     return angle
     

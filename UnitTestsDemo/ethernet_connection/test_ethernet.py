@@ -19,7 +19,7 @@ def add_ip():
         print(out)
         return True
         
-    elif ("172.24.156.196" in ip) and ("192.168.1.102" not in ip):
+    elif ("172.31.36.98" in ip) and ("192.168.1.102" not in ip):
         add_ip_cmd = (['sudo', 'ip', 'addr', 'add', '192.168.1.102/24', 'dev', 'eth0'])
         result = subprocess.run(add_ip_cmd, capture_output=True, text=True)
         out = result.stdout
