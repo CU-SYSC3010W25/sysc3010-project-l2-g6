@@ -129,17 +129,13 @@
   
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Get the hostname or fallback to a default Raspberry Pi IP
-      const hostIP = window.location.hostname || "172.17.119.47";
-      const streamUrl = `http://${hostIP}:8080/?action=stream`;
+      const streamUrl = "http://172.17.115.158:8000/stream.mjpg";
       document.getElementById("cameraFeed").src = streamUrl;
       
-      // Attach chat form submit handler
       document.getElementById("chatForm").addEventListener("submit", handleChatSubmit);
-      
-      // Switch Page Button: redirect to interpreter.html on click
+
       document.getElementById("switchPageButton").addEventListener("click", function() {
-        window.location.href = "interpreter.html";
+        window.location.href = "interpreter.html?nocache=" + new Date().getTime();
       });
     });
     

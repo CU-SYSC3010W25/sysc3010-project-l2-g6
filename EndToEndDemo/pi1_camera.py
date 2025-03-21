@@ -8,8 +8,3 @@ libcamera_vid_cmd = (
 
 # Start the GStreamer pipeline and capture errors
 process = subprocess.Popen(libcamera_vid_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-# Keep the script alive
-while True:
-    time.sleep(1)
-    #print("Running...")
