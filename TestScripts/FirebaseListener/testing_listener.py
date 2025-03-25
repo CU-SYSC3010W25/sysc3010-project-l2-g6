@@ -3,14 +3,14 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 # Initialize Firebase
-cred = credentials.Certificate("sysc-3010-project-l2-g6-firebase-adminsdk-fbsvc-70fcaf4ec4.json")
+cred = credentials.Certificate("../../config/interprePi access key.json")
 firebase_admin.initialize_app(cred, {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"})
 
 latest_stream_enabled = None
 
 def fetch_settings(queue):
     """Listens for Firebase updates and sends them to the queue."""
-    ref = db.reference("ui_test_messages/0")
+    ref = db.reference("settings/2")
 
     def stream_listener(event):
         """Triggered when 'stream_enabled' changes."""
