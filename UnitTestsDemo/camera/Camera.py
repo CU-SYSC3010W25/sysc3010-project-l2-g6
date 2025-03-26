@@ -39,13 +39,6 @@ class Camera:
                 self.process = subprocess.Popen(config.VID_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 await asyncio.sleep(1)  # sleep to allow the process to start
 
-                # Capture stdout and stderr
-                stdout, stderr = self.process.communicate()
-                if stdout:
-                    print(f"Camera stream output: {stdout.decode()}")
-                if stderr:
-                    print(f"Camera stream error: {stderr.decode()}")
-
             elif not self.running and self.process: #if not running and the process exists then close the process
                 print("Stopping Camera Stream.")
                 self.stopCamera() #function to terminate process
@@ -72,6 +65,8 @@ class Camera:
                 self.setServoAngle(angle)
                 self.servoDirection = 0
 
+            await asyncio.sleep(0.05)
+
 
             
     #camera functions
@@ -93,20 +88,16 @@ class Camera:
         self.servoPWM = GPIO.PWM(self.servoPin, config.SERVO_FREQ) #set the pulse width modulation with the frequency for pin 18
         self.servoPWM.start(0) #start the PWM
 
-    def setServoAngle(self, angle: float): #moves the servo to an angle within the min and max limits
+    def setServoAngle(self, angle): #moves the servo to an angle within the min and max limits
         if (angle < 0):
             angle = 0
         elif(angle > 180):
             angle = 180
-
-        if (angle == self.servoCurrentAngle):
-            self.servoPWM.ChangeDutyCycle(0)
            
         duty = angle / 18 + 2.5
         self.servoPWM.ChangeDutyCycle(duty)
         time.sleep(0.25)
         self.servoPWM.ChangeDutyCycle(0)  # Turn off the signal to avoid jitter
-        time.sleep(1)
         
         print(f"Servo moved to {angle}°")
 
