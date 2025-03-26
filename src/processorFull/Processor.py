@@ -1,7 +1,6 @@
 import cv2
 import threading
 import os
-import subprocess
 import queue
 
 from processorFull import config
@@ -16,12 +15,9 @@ class Processor:
         self.listenerThread = None
         self.interpretThread = None
 
-        self.IPScriptPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "addip.sh")
         self.modelPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model.tflite")
         self.listener = Listener(self.stream)
         self.createThreads()
-
-        subprocess.run(['bash', self.IPScriptPath])
 
     def createThreads(self):
         self.processThread = threading.Thread(target=self.processFrames)
@@ -35,7 +31,7 @@ class Processor:
     def processFrames(self):
         """Process frames and stop cleanly when `self.running` is False."""
         # Use FFmpeg instead of GStreamer
-        self.cap = cv2.VideoCapture("udp://@:5000", cv2.CAP_FFMPEG)
+        self.cap = cv2.VideoCapture(config.FFMPEG_PIPELINE, cv2.CAP_FFMPEG)
         if not self.cap.isOpened():
             print("Error: Unable to open video stream")
             return  # Exit safely
