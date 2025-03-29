@@ -10,6 +10,8 @@ FB_CERT = r"C:\Users\kylec\Programming\Code\School\SYSC3010 - Computer Systems P
 FB_URL = {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"}
 
 SETTINGS = "settings/1"
+GESTURES = "Gestures"
+
 
 FRAME_NUM = 1
 

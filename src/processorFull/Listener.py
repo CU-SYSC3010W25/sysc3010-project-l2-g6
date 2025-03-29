@@ -7,7 +7,8 @@ class Listener:
     def __init__(self, streamCallback):
         self.streamCallback = streamCallback
 
-        self.ref = None
+        self.settingsRef = None
+        self.gesturesRef = None
         self.cred = None
         self.initalizeFB()
 
@@ -16,7 +17,7 @@ class Listener:
         firebase_admin.initialize_app(self.cred, config.FB_URL)
 
     def getSettings(self):
-        self.ref = db.reference(config.SETTINGS)
+        self.settingsRef = db.reference(config.SETTINGS)
 
         def streamListener(event):
             key = event.path.lstrip('/')
@@ -25,6 +26,21 @@ class Listener:
 
             if key == "Stream":
                 self.streamCallback(value)
+            elif isinstance(value, dict) and "Stream" in value:
+                self.streamCallback(value["Stream"])
 
-        self.ref.listen(streamListener)
+        self.settingsRef.listen(streamListener)
+
+    def updateFirebase(self, symbol):
+        self.gesturesRef = db.reference(config.GESTURES)
+        try: 
+            current = self.gesturesRef.child('currentGesture').get()
+            updates = {
+                'prevGesture': current,
+                'currentGesture': symbol
+            }
+            self.gesturesRef.update(updates)
+        except Exception as e:
+            print(f"❌ Firebase update failed: {str(e)}")
+
 

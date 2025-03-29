@@ -120,6 +120,7 @@ class Processor:
                     if label != self.last_stable_symbol:
                         print(f"Letter Detected: {label} (Held {self.MIN_HOLD_TIME}s)")
                         self.last_stable_symbol = label
+                        self.listener.updateFirebase(label)
 
             except queue.Empty:
                 continue
