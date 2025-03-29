@@ -1,5 +1,5 @@
 VID_CMD = (
-    "libcamera-vid -t 0 --width 640 --height 480 --framerate 30 --codec h264 --inline --profile high -o udp://192.168.1.102:5000"
+    "libcamera-vid -t 0 --width 640 --height 400 --framerate 30 --codec h264 --profile high --inline --listen -o udp://192.168.1.102:5000"
 )
 
 FB_CERT = "/home/andrewrivera/sysc3010-project-l2-g6/config/interprePi access key.json"

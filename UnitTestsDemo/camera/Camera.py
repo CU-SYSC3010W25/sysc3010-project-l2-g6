@@ -37,13 +37,13 @@ class Camera:
             if self.running and self.process is None: #if running but there's no process then create one with the video stream
                 print("Starting Camera Stream.")
                 self.process = subprocess.Popen(config.VID_CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                await asyncio.sleep(1)  # sleep to allow the process to start
+                await asyncio.sleep(0.05)  # sleep to allow the process to start
 
             elif not self.running and self.process: #if not running and the process exists then close the process
                 print("Stopping Camera Stream.")
                 self.stopCamera() #function to terminate process
 
-            await asyncio.sleep(1)  # sleep
+            await asyncio.sleep(0.05)  # sleep
 
     async def settingsListen(self): #start settings listener
         await asyncio.to_thread(self.listener.getSettings) #call the listener to start getting settings
