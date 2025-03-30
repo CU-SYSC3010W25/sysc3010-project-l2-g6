@@ -1,6 +1,7 @@
+# interprePi - Setting up the System
 // please add your respective sections of code and set up instructions
 
-# Setting up the GUI
+## Setting up the GUI
 
 To set up the GUI you will need to first make sure that the camera pi (streaming) runs their streaming py file. This is found in: (need to add this)
 - Run the streaming python file by navigating to the directory where the file is located in your raspberry pi terminal, then running: python3 (camera_web_streamer.py) // replace with actual file name
