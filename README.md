@@ -12,3 +12,11 @@ Once we have this up and running, now we can run our firebase listener python fi
 After this, we can finally run our http server. Navigate to where the interpreter and signer html files are located. (src/GUI/frontend)
 - Be sure to update the IP addresses in intepreter.html line 158 to hold the IP address of the raspberry pi that is streaming its video, as well as lines 168, 183, and 193 to hold the IP address of the raspberry pi you are working on.
 - Once these fixes are made all that is left to do is run: python3 -m http.server 8080
+
+## Running GUI Unit Tests
+
+To run the GUI unit tests the files are all located in the UnitTestsDemo/GUI folder. After navigating to this folder in your raspberry pi terminal you can run any of the tests using this command:
+python3 (test_file_name_).py
+- ex: python3 audio_mic_test.py
+
+  
