@@ -158,13 +158,15 @@
     let servoDirection = 0;
 
     document.addEventListener("DOMContentLoaded", function() {
-      const streamUrl = "http://172.17.142.144:8000/stream.mjpg";
+      const streamUrl = "http://172.17.129.94:8000/stream.mjpg";
       document.getElementById("cameraFeed").src = streamUrl;
 
       document.getElementById("chatForm").addEventListener("submit", handleChatSubmit);
       document.getElementById("switchPageButton").addEventListener("click", function() {
         window.location.href = "interpreter.html?nocache=" + new Date().getTime();
       });
+      document.getElementById("upArrowButton").addEventListener("click", toggleUpArrow);
+      document.getElementById("downArrowButton").addEventListener("click", toggleDownArrow);
     });
     
     // Function to add a new message to the conversation log
@@ -187,6 +189,29 @@
         inputField.value = ""; // Clear the input field
       }
     }
+
+    function toggleUpArrow() {
+      fetch("http://172.17.140.136:5000/updateServo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ direction: "up" })
+      })
+      .then(response => response.json())
+      .then(data => console.log("Up Arrow Response:", data))
+      .catch(error => console.error("Error updating servo:", error));
+    }
+
+    function toggleDownArrow() {
+        fetch("http://172.17.140.136:5000/updateServo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ direction: "down" })
+        })
+        .then(response => response.json())
+        .then(data => console.log("Down Arrow Response:", data))
+        .catch(error => console.error("Error updating servo:", error));
+    }
+
   </script>
 </head>
 <body>

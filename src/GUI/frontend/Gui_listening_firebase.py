@@ -7,7 +7,7 @@ import threading
 import os
 
 # Initialize Firebase
-cred = credentials.Certificate("/home/vthanesh/sysc3010-project-l2-g6/config/interprePi access key.json")
+cred = credentials.Certificate("/home/divyadushy/InterprePi/sysc3010-project-l2-g6/src/GUI/sysc-3010-project-l2-g6-firebase-adminsdk-fbsvc-70fcaf4ec4.json")
 
 # Initialize Firebase app
 firebase_admin.initialize_app(cred, {
@@ -132,14 +132,55 @@ def update_hearing():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-# API Route to Update isHearing in Firebase
+# API Route to Update isSpeaking in Firebase
 @app.route('/updateSpeaking', methods=['POST'])
 def update_speaking():
     try:
         db.reference("settings/3").update({"isSpeaking": True})
-        return jsonify({"success": True, "message": "isHearing updated to True"}), 200
+        return jsonify({"success": True, "message": "isSpeaking updated to True"}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/updateServo', methods=['POST'])
+def update_servo():
+    try:
+        data = request.get_json()
+        print("Received direction:", data)
+
+        direction = data.get('direction')
+        settings_ref = db.reference("settings/0")
+        current_settings = settings_ref.get()
+        print("Current Firebase settings:", current_settings)
+
+        current_angle = current_settings.get("ServoAngle", 90)
+
+        if direction == "up":
+            new_angle = min(current_angle + 30, 180)
+            new_direction = 1
+        elif direction == "down":
+            new_angle = max(current_angle - 30, 0)
+            new_direction = -1
+        else:
+            return jsonify({"success": False, "error": "Invalid direction"}), 400
+
+        print("Updating Firebase to:", new_angle, new_direction)
+        settings_ref.update({
+            "ServoAngle": new_angle,
+            "ServoDirection": new_direction
+        })
+
+        return jsonify({
+            "success": True,
+            "newAngle": new_angle,
+            "newDirection": new_direction
+        }), 200
+
+    except Exception as e:
+        print("Error in /updateServo:", str(e))
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

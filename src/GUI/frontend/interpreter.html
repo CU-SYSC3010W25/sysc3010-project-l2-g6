@@ -162,7 +162,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const streamUrl = "http://172.17.142.144:8000/stream.mjpg";
+            const streamUrl = "http://172.17.129.94:8000/stream.mjpg";
             document.getElementById("cameraFeed").src = streamUrl;
 
             document.getElementById("switchPageButton").addEventListener("click", function() {
@@ -176,7 +176,7 @@
             const message = input.value.trim();
             if (message) {
                 // Send the message to Flask server (SQLite)
-                fetch("http://192.168.2.231:5000/sendMessage", {
+                fetch("http://172.17.140.136:5000/sendMessage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: message })
@@ -197,7 +197,7 @@
     let lastReply = null;
 
     // First fetch reply on page load to skip old messages
-    fetch("http://192.168.2.231:5000/latestReply")
+    fetch("http://172.17.140.136:5000/latestReply")
     .then(res => res.json())
     .then(data => {
         lastReply = data.message;
@@ -205,7 +205,7 @@
 
 
         setInterval(() => {
-        fetch("http://192.168.2.231:5000/latestReply")
+        fetch("http://172.17.140.136:5000/latestReply")
         .then(res => res.json())
         .then(data => {
         const latestReply = data.message;
@@ -227,7 +227,7 @@
 
         // Fetch the latest gesture from Flask API
         function fetchGesture() {
-            fetch("http://192.168.2.231:5000/gesture")
+            fetch("http://172.17.140.136:5000/gesture")
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById("cameraLabel").textContent = data.gesture;
@@ -242,7 +242,7 @@
 
         // Update isHearing in Firebase via Flask API
         function toggleSpeaker() {
-            fetch("http://192.168.2.231:5000/updateHearing", {
+            fetch("http://172.17.140.136:5000/updateHearing", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })
@@ -252,7 +252,7 @@
         }
 
         function toggleMic() {
-            fetch("http://192.168.2.231:5000/updateSpeaking", {
+            fetch("http://172.17.140.136:5000/updateSpeaking", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })
