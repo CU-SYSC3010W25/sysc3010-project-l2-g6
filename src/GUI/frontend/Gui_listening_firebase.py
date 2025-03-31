@@ -5,6 +5,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 import threading
 import os
+import time
 
 # Initialize Firebase
 cred = credentials.Certificate("/home/divyadushy/InterprePi/sysc3010-project-l2-g6/src/GUI/sysc-3010-project-l2-g6-firebase-adminsdk-fbsvc-70fcaf4ec4.json")
@@ -34,7 +35,7 @@ def init_db():
 
 init_db()
 
-# API to send a message
+# API to send a messagenew_direction
 @app.route("/sendMessage", methods=["POST"])
 def send_message():
     data = request.get_json()
@@ -155,18 +156,34 @@ def update_servo():
         current_angle = current_settings.get("ServoAngle", 90)
 
         if direction == "up":
-            new_angle = min(current_angle + 30, 180)
-            new_direction = 1
+            #new_angle = min(current_angle + 30, 180)
+            #new_direction = 1
+
+            settings_ref.update({
+                "ServoAngle": 90,
+                "ServoDirection": 1
+            })
+
+            time.sleep(0.2)
+
         elif direction == "down":
-            new_angle = max(current_angle - 30, 0)
-            new_direction = -1
+            #new_angle = max(current_angle - 30, 0)
+            #new_direction = -1
+
+            settings_ref.update({
+                "ServoAngle": 90,
+                "ServoDirection": -1
+            })
+
+            time.sleep(0.2)
+            
         else:
             return jsonify({"success": False, "error": "Invalid direction"}), 400
 
-        print("Updating Firebase to:", new_angle, new_direction)
+        #print("Updating Firebase to:", new_angle, new_direction)
         settings_ref.update({
-            "ServoAngle": new_angle,
-            "ServoDirection": new_direction
+            "ServoAngle": 90,
+            "ServoDirection": 0
         })
 
         return jsonify({
