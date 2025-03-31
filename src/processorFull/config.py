@@ -12,7 +12,4 @@ FB_URL = {"databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebasei
 SETTINGS = "settings/1"
 GESTURES = "Gestures"
 
-
-FRAME_NUM = 1
-
 IMG_SIZE = 64  
