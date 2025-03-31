@@ -13,41 +13,36 @@
 
   <!-- CSS for Layout, Label, and Button -->
   <style>
-    /* Body: relative positioning for absolute elements */
     body {
       position: relative;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* Top aligned */
-      align-items: center; /* Centered horizontally */
+      justify-content: flex-start;
+      align-items: center;
       height: 100vh;
       margin: 0;
       padding-top: 20px;
       background-color: #f4f4f4;
       font-family: Arial, sans-serif;
     }
-    
-    /* Camera Feed Section */
+
     #cameraFeedSection {
       text-align: center;
       margin-bottom: 20px;
     }
-    
-    /* Wrapper for camera feed and label */
+
     #cameraFeedWrapper {
       display: inline-block;
       text-align: center;
     }
-    
-    /* Camera Feed Image Styling (Border only around the image) */
+
     #cameraFeed {
       border: 2px solid #333;
       border-radius: 10px;
       box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       display: block;
     }
-    
-    /* Turquoise label placed under the image */
+
     #cameraLabel {
       background-color: turquoise;
       color: white;
@@ -58,8 +53,7 @@
       border-radius: 0 0 10px 10px;
       margin-top: 5px;
     }
-    
-    /* Conversation Log: Positioned in the top right corner */
+
     #conversationLog {
       position: absolute;
       top: 20px;
@@ -72,26 +66,25 @@
       overflow-y: scroll;
       background-color: #fff;
     }
-    
+
     #conversationLog h2 {
       text-align: center;
       font-size: 1.5em;
       color: #333;
     }
-    
+
     .message {
       background-color: #e0e0e0;
       margin-bottom: 10px;
       padding: 5px;
       border-radius: 5px;
     }
-    
-    /* Chat input styling */
+
     #chatInput {
       display: flex;
       margin-top: 10px;
     }
-    
+
     #chatInput input {
       width: 80%;
       padding: 10px;
@@ -99,7 +92,7 @@
       border-radius: 5px;
       font-size: 1em;
     }
-    
+
     #chatInput button {
       width: 25%;
       padding: 10px;
@@ -111,8 +104,7 @@
       cursor: pointer;
       border-radius: 5px;
     }
-    
-    /* Switch Page Button: fixed in the bottom left corner */
+
     #switchPageButton {
       position: fixed;
       bottom: 20px;
@@ -125,83 +117,79 @@
       cursor: pointer;
       font-size: 1em;
     }
-  </style>
-  
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const streamUrl = "http://172.17.115.158:8000/stream.mjpg";
-      document.getElementById("cameraFeed").src = streamUrl;
-      
-      document.getElementById("chatForm").addEventListener("submit", handleChatSubmit);
 
+    #bottomRightContainer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #fff;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    #bottomRightContainer label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+      font-size: 1em;
+    }
+
+    .arrowButtonGroup {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .arrowButton {
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5em;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+    }
+  </style>
+
+  <script>
+    let servoDirection = 0;
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const streamUrl = "http://172.17.142.144:8000/stream.mjpg";
+      document.getElementById("cameraFeed").src = streamUrl;
+
+      document.getElementById("chatForm").addEventListener("submit", handleChatSubmit);
       document.getElementById("switchPageButton").addEventListener("click", function() {
         window.location.href = "interpreter.html?nocache=" + new Date().getTime();
       });
     });
     
-    let lastSentMessage = "";
-    let lastSeenMessage = "";
-
     // Function to add a new message to the conversation log
     function addMessage(messageText) {
-    const messageContainer = document.getElementById("messages");
-    const newMessage = document.createElement("div");
-    newMessage.classList.add("message");
-    newMessage.innerText = messageText;
-    messageContainer.appendChild(newMessage);
-    messageContainer.scrollTop = messageContainer.scrollHeight; // Auto-scroll to bottom
-  }
-
-  // Handle chat input submission
-  function handleChatSubmit(event) {
-    event.preventDefault();
-    const inputField = document.getElementById("chatInputField");
-    const messageText = inputField.value.trim();
-    if (messageText) {
-      // Add to local conversation log
-      addMessage(messageText);
-
-   
-      fetch("http://192.168.2.231:5000/sendReply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageText })
-      })
-    .then(res => res.json())
-    .then(data => console.log("Reply sent:", data))
-    .catch(err => console.error("Error sending reply:", err));
-
-    inputField.value = ""; // Clear the input field
-    lastSentMessage = messageText;
-
-  }
-  }
-
-  // 🔁 Add this block after the functions, outside DOMContentLoaded
-  setInterval(() => {
-  fetch("http://192.168.2.231:5000/latestMessage")
-    .then(res => res.json())
-    .then(data => {
-      const latestMessage = data.message;
-      if (latestMessage && latestMessage !== lastSeenMessage && latestMessage !== lastSentMessage) {
-        lastSeenMessage = latestMessage;
-
-        document.getElementById("cameraLabel").textContent = `Interpreter: ${latestMessage}`;
-        const messagesContainer = document.getElementById("messages");
-        const msgDiv = document.createElement("div");
-        msgDiv.className = "message";
-        msgDiv.innerText = `Interpreter: ${latestMessage}`;
-        messagesContainer.appendChild(msgDiv);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      const messageContainer = document.getElementById("messages");
+      const newMessage = document.createElement("div");
+      newMessage.classList.add("message");
+      newMessage.innerText = messageText;
+      messageContainer.appendChild(newMessage);
+      messageContainer.scrollTop = messageContainer.scrollHeight; // Auto-scroll to bottom
+    }
+    
+    // Handle chat input submission
+    function handleChatSubmit(event) {
+      event.preventDefault();
+      const inputField = document.getElementById("chatInputField");
+      const messageText = inputField.value.trim();
+      if (messageText) {
+        addMessage(messageText);
+        inputField.value = ""; // Clear the input field
       }
-    })
-    .catch(err => console.error("Error fetching message:", err));
-}, 1000);
-
+    }
   </script>
 </head>
 <body>
-  <!-- Camera Feed Section: Title and feed near the top -->
   <div id="cameraFeedSection">
     <h1>InterprePi</h1>
     <div id="cameraFeedWrapper">
@@ -209,8 +197,7 @@
       <div id="cameraLabel">Initial Label</div>
     </div>
   </div>
-  
-  <!-- Conversation Log in the Top Right Corner -->
+
   <div id="conversationLog">
     <h2>Conversation Log</h2>
     <div id="messages"></div>
@@ -221,8 +208,15 @@
       </div>
     </form>
   </div>
-  
-  <!-- Switch Page Button in the Bottom Left Corner -->
+
   <button id="switchPageButton">Switch to Interpreter</button>
+
+  <div id="bottomRightContainer">
+    <label>Camera Angle</label>
+    <div class="arrowButtonGroup">
+      <button id="upArrowButton" class="arrowButton">⬆️</button>
+      <button id="downArrowButton" class="arrowButton">⬇️</button>
+    </div>
+  </div>
 </body>
 </html>
