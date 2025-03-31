@@ -156,9 +156,11 @@
 
   <script>
     let servoDirection = 0;
+    let lastSentMessage = "";
+    let lastSeenMessage = "";
 
     document.addEventListener("DOMContentLoaded", function() {
-      const streamUrl = "http://172.17.129.94:8000/stream.mjpg";
+      const streamUrl = "http://172.17.142.144:8000/stream.mjpg";
       document.getElementById("cameraFeed").src = streamUrl;
 
       document.getElementById("chatForm").addEventListener("submit", handleChatSubmit);
@@ -170,25 +172,63 @@
     });
     
     // Function to add a new message to the conversation log
-    function addMessage(messageText) {
-      const messageContainer = document.getElementById("messages");
-      const newMessage = document.createElement("div");
-      newMessage.classList.add("message");
-      newMessage.innerText = messageText;
-      messageContainer.appendChild(newMessage);
-      messageContainer.scrollTop = messageContainer.scrollHeight; // Auto-scroll to bottom
-    }
-    
-    // Handle chat input submission
-    function handleChatSubmit(event) {
-      event.preventDefault();
-      const inputField = document.getElementById("chatInputField");
-      const messageText = inputField.value.trim();
-      if (messageText) {
-        addMessage(messageText);
-        inputField.value = ""; // Clear the input field
+function addMessage(messageText) {
+  const messageContainer = document.getElementById("messages");
+  const newMessage = document.createElement("div");
+  newMessage.classList.add("message");
+  newMessage.innerText = messageText;
+  messageContainer.appendChild(newMessage);
+  messageContainer.scrollTop = messageContainer.scrollHeight; // Auto-scroll to bottom
+}
+
+// Handle chat input submission
+function handleChatSubmit(event) {
+  event.preventDefault();
+  const inputField = document.getElementById("chatInputField");
+  const messageText = inputField.value.trim();
+
+  if (messageText) {
+    // Add to local conversation log
+    addMessage(messageText);
+
+    fetch("http://192.168.2.231:5000/sendReply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: messageText })
+    })
+      .then(res => res.json())
+      .then(data => console.log("Reply sent:", data))
+      .catch(err => console.error("Error sending reply:", err));
+
+    inputField.value = ""; // Clear the input field
+    lastSentMessage = messageText;
+  }
+}
+
+// 🔁 Add this block after the functions, outside DOMContentLoaded
+setInterval(() => {
+  fetch("http://192.168.2.231:5000/latestMessage")
+    .then(res => res.json())
+    .then(data => {
+      const latestMessage = data.message;
+      if (
+        latestMessage &&
+        latestMessage !== lastSeenMessage &&
+        latestMessage !== lastSentMessage
+      ) {
+        lastSeenMessage = latestMessage;
+
+        document.getElementById("cameraLabel").textContent = `Interpreter: ${latestMessage}`;
+        const messagesContainer = document.getElementById("messages");
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "message";
+        msgDiv.innerText = `Interpreter: ${latestMessage}`;
+        messagesContainer.appendChild(msgDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
       }
-    }
+    })
+    .catch(err => console.error("Error fetching message:", err));
+}, 1000);
 
     function toggleUpArrow() {
       fetch("http://172.17.140.136:5000/updateServo", {
@@ -211,7 +251,6 @@
         .then(data => console.log("Down Arrow Response:", data))
         .catch(error => console.error("Error updating servo:", error));
     }
-
   </script>
 </head>
 <body>
