@@ -94,7 +94,7 @@
         }
 
         #chatInput button {
-            width: 15%;
+            width: 25%;
             padding: 10px;
             margin-left: 5%;
             border: 1px solid #333;
@@ -142,6 +142,13 @@
         </div>
     </div>
 
+    <form id="chatForm">
+        <div id="chatInput">
+          <input id="chatInputField" type="text" placeholder="Type your message..." required>
+          <button type="submit">Send</button>
+        </div>
+      </form>
+
     <div id="conversationLog">
         <h2>Conversation Log</h2>
         <div id="messages"></div>
@@ -163,9 +170,64 @@
             });
         });
 
+        document.getElementById("chatForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const input = document.getElementById("chatInputField");
+            const message = input.value.trim();
+            if (message) {
+                // Send the message to Flask server (SQLite)
+                fetch("http://192.168.2.231:5000/sendMessage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message })
+            })
+            .then(res => res.json())
+            .then(data => console.log("Server response:", data))
+            .catch(err => console.error("Error sending message:", err));
+
+            // Add message to conversation log UI
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message";
+            msgDiv.innerText = message;
+            document.getElementById("messages").appendChild(msgDiv);
+            input.value = "";
+        }
+    });
+
+    let lastReply = null;
+
+    // First fetch reply on page load to skip old messages
+    fetch("http://192.168.2.231:5000/latestReply")
+    .then(res => res.json())
+    .then(data => {
+        lastReply = data.message;
+  });
+
+
+        setInterval(() => {
+        fetch("http://192.168.2.231:5000/latestReply")
+        .then(res => res.json())
+        .then(data => {
+        const latestReply = data.message;
+        if (latestReply && latestReply !== lastReply) {
+            lastReply = latestReply;
+
+            const messagesContainer = document.getElementById("messages");
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message";
+            msgDiv.innerText = `Signer: ${latestReply}`;
+            messagesContainer.appendChild(msgDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    })
+        .catch(err => console.error("Error fetching reply:", err));
+    }, 1000);
+
+
+
         // Fetch the latest gesture from Flask API
         function fetchGesture() {
-            fetch("http://172.17.142.98:5000/gesture")
+            fetch("http://192.168.2.231:5000/gesture")
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById("cameraLabel").textContent = data.gesture;
@@ -180,7 +242,7 @@
 
         // Update isHearing in Firebase via Flask API
         function toggleSpeaker() {
-            fetch("http://172.17.142.98:5000/updateHearing", {
+            fetch("http://192.168.2.231:5000/updateHearing", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })
@@ -190,7 +252,7 @@
         }
 
         function toggleMic() {
-            fetch("http://172.17.142.98:5000/updateSpeaking", {
+            fetch("http://192.168.2.231:5000/updateSpeaking", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })

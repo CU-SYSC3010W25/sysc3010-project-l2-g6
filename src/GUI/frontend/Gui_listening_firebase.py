@@ -1,11 +1,13 @@
+import sqlite3
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, db
 import threading
+import os
 
 # Initialize Firebase
-cred = credentials.Certificate("/home/divyadushy/InterprePi/sysc3010-project-l2-g6/config/interprePi access key.json")
+cred = credentials.Certificate("/home/vthanesh/sysc3010-project-l2-g6/config/interprePi access key.json")
 
 # Initialize Firebase app
 firebase_admin.initialize_app(cred, {
@@ -14,6 +16,88 @@ firebase_admin.initialize_app(cred, {
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS to allow frontend to communicate with backend
+
+# Local Database
+DB_FILE = "conversation.db"
+
+def init_db():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        conn.commit()
+
+init_db()
+
+# API to send a message
+@app.route("/sendMessage", methods=["POST"])
+def send_message():
+    data = request.get_json()
+    message = data.get("message", "").strip()
+    if not message:
+        return jsonify({"success": False, "error": "Empty message"}), 400
+
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO messages (content) VALUES (?)", (message,))
+        conn.commit()
+    return jsonify({"success": True, "message": "Message saved"}), 200
+
+# API to get the latest message
+@app.route("/latestMessage", methods=["GET"])
+def get_latest_message():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT content FROM messages ORDER BY id DESC LIMIT 1")
+        result = cursor.fetchone()
+        if result:
+            return jsonify({"message": result[0]})
+        else:
+            return jsonify({"message": "Initial Label"})
+        
+# Ensure "replies" table exists
+def init_reply_table():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS replies (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        conn.commit()
+
+init_reply_table()
+
+# Route for signer to send a reply
+@app.route("/sendReply", methods=["POST"])
+def send_reply():
+    data = request.get_json()
+    message = data.get("message", "").strip()
+    if not message:
+        return jsonify({"success": False, "error": "Empty reply"}), 400
+
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO replies (content) VALUES (?)", (message,))
+        conn.commit()
+    return jsonify({"success": True, "message": "Reply saved"}), 200
+
+# Route for interpreter to get latest reply
+@app.route("/latestReply", methods=["GET"])
+def get_latest_reply():
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT content FROM replies ORDER BY id DESC LIMIT 1")
+        result = cursor.fetchone()
+        return jsonify({"message": result[0] if result else ""})
+
 
 # Store latest gesture
 latest_gesture = {"gesture": "Initial Label"}
