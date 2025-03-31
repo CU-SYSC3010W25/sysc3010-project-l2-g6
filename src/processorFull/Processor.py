@@ -24,13 +24,30 @@ class Processor:
         self.MIN_HOLD_TIME = 0.8  # Seconds to register a symbol
         self.MIN_CONFIDENCE = 0.7  # Confidence threshold
         
-        # Initialize model with hand cropping
+        self.log_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),  # Script directory
+            "predictions_log.csv"
+        )
         model_path = os.path.join(os.path.dirname(__file__), "model.h5")
-        self.model = Model(model_path, config.IMG_SIZE)
-        
-        self.listener = Listener(self.stream)
-        self.init_logfile()
 
+        self.model = Model(model_path, config.IMG_SIZE)
+        self.listener = Listener(self.stream)
+
+        self.createThreads()
+
+    def createThreads(self):
+        self.processThread = threading.Thread(target=self.processFrames)
+        self.listenerThread = threading.Thread(target=self.listener.getSettings, daemon=True)
+        
+        self.interpretThread = threading.Thread(target=self.runInterpret, daemon=True)
+        
+        self.processThread.start()
+        self.listenerThread.start()
+        
+        self.interpretThread.start()
+
+
+    #thread functions
     def processFrames(self):
         """Capture and optionally display frames with hand cropping."""
         if not self.testing:
@@ -80,17 +97,8 @@ class Processor:
             except queue.Empty:
                 continue
 
-    def log_prediction(self, label, confidence, proc_time):
-        """Log prediction to CSV."""
-        with open(self.log_path, "a", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                datetime.now().isoformat(timespec='milliseconds'),
-                label,
-                f"{confidence:.4f}",
-                proc_time
-            ])
 
+    #firebase stuff
     def update_symbol_state(self, label, confidence):
         """Track symbol stability for Firebase updates."""
         current_time = time.time()
@@ -119,3 +127,30 @@ class Processor:
             self.running = False
             if self.processThread:
                 self.processThread.join()
+
+
+    #logging
+    def init_logfile(self):
+        try:
+            with open(self.log_path, "w", newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(["timestamp", "predicted_class", "confidence", "frame_time_ms"])
+            print(f"✅ Log file reset: {self.log_path}")
+        except Exception as e:
+            print(f"❌ Failed to reset log file: {str(e)}")
+            # Fallback to current directory if needed
+            self.log_path = "predictions_log.csv"
+            with open(self.log_path, "w", newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(["timestamp", "predicted_class", "confidence", "frame_time_ms"])
+
+    def log_prediction(self, label, confidence, proc_time):
+        """Log prediction to CSV."""
+        with open(self.log_path, "a", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                datetime.now().isoformat(timespec='milliseconds'),
+                label,
+                f"{confidence:.4f}",
+                proc_time
+            ])
