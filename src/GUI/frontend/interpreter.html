@@ -142,6 +142,12 @@
         </div>
     </div>
 
+    <div id="signedSentence"
+        style="margin-top: 15px; font-size: 1.3em; font-weight: bold; color: #222;">
+        Signed Sentence: (waiting...)
+    </div>
+
+
     <form id="chatForm">
         <div id="chatInput">
           <input id="chatInputField" type="text" placeholder="Type your message..." required>
@@ -176,7 +182,7 @@
             const message = input.value.trim();
             if (message) {
                 // Send the message to Flask server (SQLite)
-                fetch("http://172.17.140.136:5000/sendMessage", {
+                fetch("http://192.168.2.231:5000/sendMessage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: message })
@@ -194,40 +200,47 @@
         }
     });
 
+    
     let lastReply = null;
 
-    // First fetch reply on page load to skip old messages
-    fetch("http://172.17.140.136:5000/latestReply")
-    .then(res => res.json())
-    .then(data => {
-        lastReply = data.message;
-  });
+    setInterval(() => {
+        fetch("http://192.168.2.231:5000/latestReply")
+            .then(res => res.json())
+            .then(data => {
+                const latestReply = data.message;
+
+                // Debug: log what was received
+                console.log("Reply received from signer:", latestReply);
+
+                // Only update if it's new
+                if (latestReply && latestReply !== lastReply) {
+                    lastReply = latestReply;
+
+                    const messagesContainer = document.getElementById("messages");
+
+                    const msgDiv = document.createElement("div");
+                    msgDiv.className = "message";
+                    msgDiv.innerText = `Signer: ${latestReply}`;
+                    messagesContainer.appendChild(msgDiv);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                    // Optional: show latest reply under the video
+                    const cameraLabel = document.getElementById("cameraLabel");
+                    if (cameraLabel) {
+                        cameraLabel.textContent = `Signer: ${latestReply}`;
+                    }
+                }
+            })
+            .catch(err => console.error("Error fetching latest reply:", err));
+        }, 1000);
 
 
-        setInterval(() => {
-        fetch("http://172.17.140.136:5000/latestReply")
-        .then(res => res.json())
-        .then(data => {
-        const latestReply = data.message;
-        if (latestReply && latestReply !== lastReply) {
-            lastReply = latestReply;
-
-            const messagesContainer = document.getElementById("messages");
-            const msgDiv = document.createElement("div");
-            msgDiv.className = "message";
-            msgDiv.innerText = `Signer: ${latestReply}`;
-            messagesContainer.appendChild(msgDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      }
-    })
-        .catch(err => console.error("Error fetching reply:", err));
-    }, 1000);
 
 
 
         // Fetch the latest gesture from Flask API
         function fetchGesture() {
-            fetch("http://172.17.140.136:5000/gesture")
+            fetch("http://192.168.2.231:5000/gesture")
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById("cameraLabel").textContent = data.gesture;
@@ -240,9 +253,38 @@
         setInterval(fetchGesture, 2000);
         fetchGesture();
 
+        // Fetch finalized signed words and display the latest one
+        setInterval(() => {
+            fetch("http://192.168.2.231:5000/words")
+            .then(res => res.json())
+            .then(data => {
+            const words = data.words || [];
+            const sentence = data.sentence || "";
+
+            // ✅ Update the sentence display
+            document.getElementById("signedSentence").textContent = `Signed Sentence: ${sentence}`;
+
+            // ✅ Update the word-by-word conversation log
+            const messagesContainer = document.getElementById("messages");
+            messagesContainer.innerHTML = ""; // Clear and rebuild
+            words.forEach(word => {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message";
+            msgDiv.innerText = `Word: ${word}`;
+            messagesContainer.appendChild(msgDiv);
+            });
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            })
+            .catch(err => console.error("Error fetching words/sentence:", err));
+        }, 2000);
+
+
+
+
         // Update isHearing in Firebase via Flask API
         function toggleSpeaker() {
-            fetch("http://172.17.140.136:5000/updateHearing", {
+            fetch("http://192.168.2.231:5000/updateHearing", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })
@@ -252,7 +294,7 @@
         }
 
         function toggleMic() {
-            fetch("http://172.17.140.136:5000/updateSpeaking", {
+            fetch("http://192.168.2.231:5000/updateSpeaking", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })

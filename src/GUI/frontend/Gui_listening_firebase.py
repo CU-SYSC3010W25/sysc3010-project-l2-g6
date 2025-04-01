@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import firebase_admin
@@ -7,7 +8,7 @@ import threading
 import os
 
 # Initialize Firebase
-cred = credentials.Certificate("/home/divyadushy/InterprePi/sysc3010-project-l2-g6/src/GUI/sysc-3010-project-l2-g6-firebase-adminsdk-fbsvc-70fcaf4ec4.json")
+cred = credentials.Certificate("/home/vthanesh/sysc3010-project-l2-g6/src/GUI/sysc-3010-project-l2-g6-firebase-adminsdk-fbsvc-70fcaf4ec4.json")
 
 # Initialize Firebase app
 firebase_admin.initialize_app(cred, {
@@ -19,6 +20,11 @@ CORS(app)  # Enable CORS to allow frontend to communicate with backend
 
 # Local Database
 DB_FILE = "conversation.db"
+
+current_word = ""
+completed_words = []
+sentence_timeout = timedelta(minutes=2)
+last_letter_time = datetime.utcnow()
 
 def init_db():
     with sqlite3.connect(DB_FILE) as conn:
@@ -104,11 +110,46 @@ latest_gesture = {"gesture": "Initial Label"}
 
 # Firebase Listener Function (Listens for changes in currentGesture)
 def stream_listener(event):
-    global latest_gesture
+    global latest_gesture, current_word, completed_words, last_letter_time
+
     new_value = event.data
     if new_value is not None:
         latest_gesture["gesture"] = new_value
         print("Updated Gesture:", new_value)
+
+        gesture = new_value.strip().lower()
+        now = datetime.utcnow()
+
+        # Check timeout (1 minute without letters)
+        if gesture == "nothing":
+        # Word timeout (1 minute)
+            if current_word and now - last_letter_time > timedelta(seconds=60):
+                completed_words.append(current_word)
+                print(f"[Timeout] Finalized word: {current_word}")
+                current_word = ""
+
+            # Sentence timeout (2 minutes)
+            if completed_words and now - last_letter_time > sentence_timeout:
+                full_sentence = " ".join(completed_words)
+                print(f"[Auto-End] Finalized sentence due to inactivity: {full_sentence}")
+                completed_words.clear()
+
+        elif gesture == "space":
+            if current_word:
+                completed_words.append(current_word)
+                print(f"[Space] Finalized word: {current_word}")
+                current_word = ""
+        elif gesture == "del":
+            current_word = current_word[:-1]
+            print(f"[Delete] New current word: {current_word}")
+        elif len(gesture) == 1 and gesture.isalpha():
+            current_word += gesture.upper()
+            last_letter_time = now
+            print(f"[Letter] Appended: {gesture.upper()} → {current_word}")
+        else:
+            print("[Ignored] Unknown gesture:", gesture)
+
+    
 
 # Start Firebase listener in a separate thread
 def start_firebase_listener():
@@ -178,6 +219,23 @@ def update_servo():
     except Exception as e:
         print("Error in /updateServo:", str(e))
         return jsonify({"success": False, "error": str(e)}), 500
+    
+# Endpoint to get all completed words
+@app.route("/words", methods=["GET"])
+def get_completed_words():
+    sentence = " ".join(completed_words)
+    return jsonify({
+        "words": completed_words,
+        "sentence": sentence
+    })
+
+
+
+# Optional: Clear stored words
+@app.route("/clearWords", methods=["POST"])
+def clear_completed_words():
+    completed_words.clear()
+    return jsonify({"success": True, "message": "Words cleared"})
 
 
 
