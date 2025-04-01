@@ -142,6 +142,12 @@
         </div>
     </div>
 
+    <div id="signedSentence"
+        style="margin-top: 15px; font-size: 1.3em; font-weight: bold; color: #222;">
+        Signed Sentence: (waiting...)
+    </div>
+
+
     <form id="chatForm">
         <div id="chatInput">
           <input id="chatInputField" type="text" placeholder="Type your message..." required>
@@ -162,7 +168,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const streamUrl = "http://172.17.115.158:8000/stream.mjpg";
+            const streamUrl = "http://172.17.129.94:8000/stream.mjpg";
             document.getElementById("cameraFeed").src = streamUrl;
 
             document.getElementById("switchPageButton").addEventListener("click", function() {
@@ -194,34 +200,41 @@
         }
     });
 
+    
     let lastReply = null;
 
-    // First fetch reply on page load to skip old messages
-    fetch("http://192.168.2.231:5000/latestReply")
-    .then(res => res.json())
-    .then(data => {
-        lastReply = data.message;
-  });
-
-
-        setInterval(() => {
+    setInterval(() => {
         fetch("http://192.168.2.231:5000/latestReply")
-        .then(res => res.json())
-        .then(data => {
-        const latestReply = data.message;
-        if (latestReply && latestReply !== lastReply) {
-            lastReply = latestReply;
+            .then(res => res.json())
+            .then(data => {
+                const latestReply = data.message;
 
-            const messagesContainer = document.getElementById("messages");
-            const msgDiv = document.createElement("div");
-            msgDiv.className = "message";
-            msgDiv.innerText = `Signer: ${latestReply}`;
-            messagesContainer.appendChild(msgDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      }
-    })
-        .catch(err => console.error("Error fetching reply:", err));
-    }, 1000);
+                // Debug: log what was received
+                console.log("Reply received from signer:", latestReply);
+
+                // Only update if it's new
+                if (latestReply && latestReply !== lastReply) {
+                    lastReply = latestReply;
+
+                    const messagesContainer = document.getElementById("messages");
+
+                    const msgDiv = document.createElement("div");
+                    msgDiv.className = "message";
+                    msgDiv.innerText = `Signer: ${latestReply}`;
+                    messagesContainer.appendChild(msgDiv);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                    // Optional: show latest reply under the video
+                    const cameraLabel = document.getElementById("cameraLabel");
+                    if (cameraLabel) {
+                        cameraLabel.textContent = `Signer: ${latestReply}`;
+                    }
+                }
+            })
+            .catch(err => console.error("Error fetching latest reply:", err));
+        }, 1000);
+
+
 
 
 
@@ -239,6 +252,35 @@
         // Fetch the gesture every 2 seconds
         setInterval(fetchGesture, 2000);
         fetchGesture();
+
+        // Fetch finalized signed words and display the latest one
+        setInterval(() => {
+            fetch("http://192.168.2.231:5000/words")
+            .then(res => res.json())
+            .then(data => {
+            const words = data.words || [];
+            const sentence = data.sentence || "";
+
+            // ✅ Update the sentence display
+            document.getElementById("signedSentence").textContent = `Signed Sentence: ${sentence}`;
+
+            // ✅ Update the word-by-word conversation log
+            const messagesContainer = document.getElementById("messages");
+            messagesContainer.innerHTML = ""; // Clear and rebuild
+            words.forEach(word => {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message";
+            msgDiv.innerText = `Word: ${word}`;
+            messagesContainer.appendChild(msgDiv);
+            });
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            })
+            .catch(err => console.error("Error fetching words/sentence:", err));
+        }, 2000);
+
+
+
 
         // Update isHearing in Firebase via Flask API
         function toggleSpeaker() {
