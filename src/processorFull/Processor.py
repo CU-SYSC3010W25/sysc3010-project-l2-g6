@@ -20,9 +20,9 @@ class Processor:
 
         self.last_stable_symbol = None
         self.current_symbol = None
-        self.symbol_start_time = 0
-        self.MIN_HOLD_TIME = 0.8  # Seconds to register a symbol
-        self.MIN_CONFIDENCE = 0.7  # Confidence threshold
+        self.symbol_start_time = config.SYMBOL_START_TIME
+        self.MIN_HOLD_TIME = config.MIN_HOLD_TIME  # Seconds to register a symbol
+        self.MIN_CONFIDENCE = config.MIN_CONFIDENCE  # Confidence threshold
         
         self.log_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),  # Script directory
