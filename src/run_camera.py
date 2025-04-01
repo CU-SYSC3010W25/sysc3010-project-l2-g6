@@ -5,4 +5,4 @@ async def main():
     camera = Camera()
     await camera.run()  # Camera handles async internally
 
-asyncio.run(main())
+asyncio.run(main()) 
