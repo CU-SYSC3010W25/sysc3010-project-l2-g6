@@ -10,3 +10,4 @@ EndToEndDemo/p1__camera.py
 ./andrew/venv/
 
 .vscode/settings.json
+src/processorFull/predictions_log.csv
