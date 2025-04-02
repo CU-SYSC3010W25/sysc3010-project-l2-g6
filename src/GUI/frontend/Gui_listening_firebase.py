@@ -121,12 +121,15 @@ def stream_listener(event):
         gesture = new_value.strip().lower()
         now = datetime.utcnow()
 
-        # Check timeout (1 minute without letters)
-        if gesture == "nothing":
-        # Word timeout (1 minute)
-            if current_word and now - last_letter_time > timedelta(seconds=60):
+        if gesture == "clear":
+            completed_words.clear()
+            current_word = ""
+            print("[Clear] Cleared all signed words and current word.")
+
+        elif gesture == "nothing":
+            if current_word:
                 completed_words.append(current_word)
-                print(f"[Timeout] Finalized word: {current_word}")
+                print(f"[Nothing Trigger] Finalized word: {current_word}")
                 current_word = ""
 
             # Sentence timeout (2 minutes)
@@ -140,17 +143,18 @@ def stream_listener(event):
                 completed_words.append(current_word)
                 print(f"[Space] Finalized word: {current_word}")
                 current_word = ""
+
         elif gesture == "del":
             current_word = current_word[:-1]
             print(f"[Delete] New current word: {current_word}")
+
         elif len(gesture) == 1 and gesture.isalpha():
             current_word += gesture.upper()
             last_letter_time = now
             print(f"[Letter] Appended: {gesture.upper()} → {current_word}")
+
         else:
             print("[Ignored] Unknown gesture:", gesture)
-
-    
 
 # Start Firebase listener in a separate thread
 def start_firebase_listener():
@@ -245,8 +249,6 @@ def get_completed_words():
         "words": completed_words,
         "sentence": sentence
     })
-
-
 
 # Optional: Clear stored words
 @app.route("/clearWords", methods=["POST"])

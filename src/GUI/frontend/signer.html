@@ -191,7 +191,7 @@ function handleChatSubmit(event) {
     // Add to local conversation log
     addMessage(messageText);
 
-    fetch("http://192.168.2.231:5000/sendReply", {
+    fetch("http:172.17.115.158:5000/sendReply", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: messageText })
@@ -207,7 +207,7 @@ function handleChatSubmit(event) {
 
 // 🔁 Add this block after the functions, outside DOMContentLoaded
 setInterval(() => {
-  fetch("http://192.168.2.231:5000/latestMessage")
+  fetch("http://172.17.115.158:5000/latestMessage")
     .then(res => res.json())
     .then(data => {
       const latestMessage = data.message;
@@ -231,7 +231,7 @@ setInterval(() => {
 }, 1000);
 
     function toggleUpArrow() {
-      fetch("http://172.17.140.136:5000/updateServo", {
+      fetch("http://172.17.115.158:5000/updateServo", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ direction: "up" })
@@ -242,7 +242,7 @@ setInterval(() => {
     }
 
     function toggleDownArrow() {
-        fetch("http://172.17.140.136:5000/updateServo", {
+        fetch("http://172.17.115.158:5000/updateServo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ direction: "down" })

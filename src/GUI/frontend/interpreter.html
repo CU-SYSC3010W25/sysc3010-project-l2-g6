@@ -168,7 +168,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const streamUrl = "http://172.17.129.94:8000/stream.mjpg";
+            const streamUrl = "http://172.17.115.158:8000/stream.mjpg";
             document.getElementById("cameraFeed").src = streamUrl;
 
             document.getElementById("switchPageButton").addEventListener("click", function() {
@@ -182,7 +182,7 @@
             const message = input.value.trim();
             if (message) {
                 // Send the message to Flask server (SQLite)
-                fetch("http://192.168.2.231:5000/sendMessage", {
+                fetch("http://172.17.115.158:5000/sendMessage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: message })
@@ -204,7 +204,7 @@
     let lastReply = null;
 
     setInterval(() => {
-        fetch("http://192.168.2.231:5000/latestReply")
+        fetch("http://172.17.115.158:5000/latestReply")
             .then(res => res.json())
             .then(data => {
                 const latestReply = data.message;
@@ -240,7 +240,7 @@
 
         // Fetch the latest gesture from Flask API
         function fetchGesture() {
-            fetch("http://192.168.2.231:5000/gesture")
+            fetch("http://172.17.115.158:5000/gesture")
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById("cameraLabel").textContent = data.gesture;
@@ -255,7 +255,7 @@
 
         // Fetch finalized signed words and display the latest one
         setInterval(() => {
-            fetch("http://192.168.2.231:5000/words")
+            fetch("http://172.17.115.158:5000/words")
             .then(res => res.json())
             .then(data => {
             const words = data.words || [];
@@ -284,7 +284,7 @@
 
         // Update isHearing in Firebase via Flask API
         function toggleSpeaker() {
-            fetch("http://192.168.2.231:5000/updateHearing", {
+            fetch("http://172.17.115.158:5000/updateHearing", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })
