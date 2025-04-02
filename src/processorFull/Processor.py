@@ -7,53 +7,57 @@ import os
 import queue
 import numpy as np
 
+
 from processorFull import config
 from processorFull.Listener import Listener
 from processorFull.Model import Model
+from processorFull.Streamer import StreamingHandler, StreamingOutput, StreamingServer, output
+
 
 class Processor:
     def __init__(self, testing=False):
         self.testing = testing
         self.cap = None
         self.running = False
-        self.frame_queue = queue.Queue(maxsize=10)  # Buffer for frames
+        self.frame_queue = queue.Queue(maxsize=10)
+        self.streaming_server = None
 
         self.last_stable_symbol = None
         self.current_symbol = None
-        self.symbol_start_time = 0
-        self.MIN_HOLD_TIME = 0.8  # Seconds to register a symbol
-        self.MIN_CONFIDENCE = 0.7  # Confidence threshold
+        self.symbol_start_time = config.SYMBOL_START_TIME
+        self.MIN_HOLD_TIME = config.MIN_HOLD_TIME
+        self.MIN_CONFIDENCE = config.MIN_CONFIDENCE
         
         self.log_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),  # Script directory
+            os.path.dirname(os.path.abspath(__file__)),
             "predictions_log.csv"
         )
         model_path = os.path.join(os.path.dirname(__file__), "model.h5")
 
         self.model = Model(model_path, config.IMG_SIZE)
         self.listener = Listener(self.stream)
-
+        self.init_logfile()
         self.createThreads()
 
     def createThreads(self):
         self.processThread = threading.Thread(target=self.processFrames)
         self.listenerThread = threading.Thread(target=self.listener.getSettings, daemon=True)
-        
         self.interpretThread = threading.Thread(target=self.runInterpret, daemon=True)
+        self.webThread = threading.Thread(target=self.start_web_server, daemon=True)
         
         self.processThread.start()
         self.listenerThread.start()
-        
         self.interpretThread.start()
+        self.webThread.start()
 
+    def start_web_server(self):
+        address = ('172.17.174.224', config.WEB_STREAM_PORT)
+        self.streaming_server = StreamingServer(address, StreamingHandler)
+        print(f"Web stream available at http://172.17.174.224:{config.WEB_STREAM_PORT}/")
+        self.streaming_server.serve_forever()
 
-    #thread functions
     def processFrames(self):
-        """Capture and optionally display frames with hand cropping."""
-        if not self.testing:
-            self.cap = cv2.VideoCapture(config.FFMPEG_PIPELINE, cv2.CAP_FFMPEG)
-        else:
-            self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(config.FFMPEG_PIPELINE, cv2.CAP_FFMPEG)
         if not self.cap.isOpened():
             print("Error: Unable to open video stream")
             return
@@ -63,44 +67,36 @@ class Processor:
             if not ret:
                 print("Error: Unable to read frame")
                 break
-                
-            # Display original stream (optional)
-            cv2.imshow('Video Stream', frame)
             
-            # Queue frame for processing if space available
+            _, jpeg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+            output.write(jpeg.tobytes())
+
             if self.frame_queue.qsize() < 10:
                 self.frame_queue.put(frame.copy())
-                
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.running = False
+
+            if not self.testing:
+                cv2.imshow('Processor Preview', frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
 
         self.cap.release()
         cv2.destroyAllWindows()
 
     def runInterpret(self):
-        """Process frames with hand cropping and interpretation."""
         while self.running:
             try:
                 frame = self.frame_queue.get(timeout=1.0)
                 start_time = time.time()
-                
-                # Hand cropping and prediction happens here
                 label, confidence = self.model.interpret(frame)
                 proc_time = int((time.time() - start_time)*1000)
 
-                # Log results
                 self.log_prediction(label, confidence, proc_time)
-                
-                # Symbol stability logic
                 self.update_symbol_state(label, confidence)
 
             except queue.Empty:
                 continue
 
-
-    #firebase stuff
     def update_symbol_state(self, label, confidence):
-        """Track symbol stability for Firebase updates."""
         current_time = time.time()
         
         if confidence < self.MIN_CONFIDENCE:
@@ -117,35 +113,29 @@ class Processor:
     def stream(self, enabled):
         if enabled and not self.running:
             self.running = True
-            self.processThread = threading.Thread(target=self.processFrames, daemon=True)
-            self.interpretThread = threading.Thread(target=self.runInterpret, daemon=True)
-            self.processThread.start()
-            self.interpretThread.start()
+            self.createThreads()
             print("✅ Starting video processing")
         elif not enabled and self.running:
             print("⛔ Stopping video processing")
             self.running = False
             if self.processThread:
                 self.processThread.join()
+            if self.streaming_server:
+                self.streaming_server.shutdown()
 
-
-    #logging
     def init_logfile(self):
         try:
             with open(self.log_path, "w", newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(["timestamp", "predicted_class", "confidence", "frame_time_ms"])
-            print(f"✅ Log file reset: {self.log_path}")
         except Exception as e:
             print(f"❌ Failed to reset log file: {str(e)}")
-            # Fallback to current directory if needed
             self.log_path = "predictions_log.csv"
             with open(self.log_path, "w", newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(["timestamp", "predicted_class", "confidence", "frame_time_ms"])
 
     def log_prediction(self, label, confidence, proc_time):
-        """Log prediction to CSV."""
         with open(self.log_path, "a", newline='') as f:
             writer = csv.writer(f)
             writer.writerow([

@@ -24,6 +24,13 @@ class Listener:
             value = event.data #get the value of the updated value
             print(f"Firebase event received: {key}: {value}")
 
+            if isinstance(value, dict):
+                if "ServoDirection" in value:
+                    key = "ServoDirection"
+                elif "ServoAngle" in value:
+                    key = "ServoAngle"
+                value = value.get(key)
+
             #trigger the callbacks depending on which key it was 
             if key == "Stream": 
                 self.streamCallback(value)
