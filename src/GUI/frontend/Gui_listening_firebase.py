@@ -164,6 +164,14 @@ def start_firebase_listener():
 # Start the Firebase listener thread
 threading.Thread(target=start_firebase_listener, daemon=True).start()
 
+@app.route('/currentWord', methods=['GET'])
+def get_current_word():
+    try:
+        word = db.reference("Gestures/word").get()
+        return jsonify({"word": word if word else ""}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # API Route to Get Latest Gesture
 @app.route('/gesture', methods=['GET'])
 def get_gesture():

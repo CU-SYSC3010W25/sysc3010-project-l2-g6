@@ -230,6 +230,21 @@ setInterval(() => {
     .catch(err => console.error("Error fetching message:", err));
 }, 1000);
 
+// Poll the current word from Flask every 2 seconds
+setInterval(() => {
+  fetch("http://172.17.115.158:5000/currentWord")
+    .then(res => res.json())
+    .then(data => {
+      const word = data.word || "(none)";
+      document.getElementById("currentWordDisplay").textContent = `From Interpreter: ${word}`;
+    })
+    .catch(err => {
+      console.error("Error fetching current word:", err);
+      document.getElementById("currentWordDisplay").textContent = `From Interpreter: (error)`;
+    });
+}, 2000);
+
+
     function toggleUpArrow() {
       fetch("http://172.17.115.158:5000/updateServo", {
           method: "POST",
@@ -259,6 +274,9 @@ setInterval(() => {
     <div id="cameraFeedWrapper">
       <img id="cameraFeed" width="640" height="480" alt="Live Stream">
       <div id="cameraLabel">Initial Label</div>
+      <div id="currentWordDisplay" style="margin-top: 10px; font-size: 1.3em; font-weight: bold; color: #222;">
+        Current Word: (loading...)
+      </div>
     </div>
   </div>
 
