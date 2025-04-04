@@ -168,7 +168,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const streamUrl = "http://172.17.115.158:8000/stream.mjpg";
+            const streamUrl = "http://172.17.174.224:8000/stream.mjpg";
             document.getElementById("cameraFeed").src = streamUrl;
 
             document.getElementById("switchPageButton").addEventListener("click", function() {
@@ -286,7 +286,10 @@
         function toggleSpeaker() {
             fetch("http://172.17.115.158:5000/updateHearing", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" }
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})
             })
             .then(response => response.json())
             .then(data => console.log("Response:", data))
@@ -294,9 +297,12 @@
         }
 
         function toggleMic() {
-            fetch("http://192.168.2.231:5000/updateSpeaking", {
+            fetch("http://172.17.115.158:5000/updateSpeaking", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" }
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})
             })
             .then(response => response.json())
             .then(data => console.log("Response:", data))

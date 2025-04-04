@@ -17,7 +17,10 @@ firebase_admin.initialize_app(cred, {
 })
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS to allow frontend to communicate with backend
+from flask_cors import CORS
+
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+  # Enable CORS to allow frontend to communicate with backend
 
 # Local Database
 DB_FILE = "conversation.db"
@@ -127,10 +130,7 @@ def stream_listener(event):
             print("[Clear] Cleared all signed words and current word.")
 
         elif gesture == "nothing":
-            if current_word:
-                completed_words.append(current_word)
-                print(f"[Nothing Trigger] Finalized word: {current_word}")
-                current_word = ""
+            print("nothing detected, continuing program")
 
             # Sentence timeout (2 minutes)
             if completed_words and now - last_letter_time > sentence_timeout:
@@ -163,6 +163,14 @@ def start_firebase_listener():
 
 # Start the Firebase listener thread
 threading.Thread(target=start_firebase_listener, daemon=True).start()
+
+@app.route('/currentWord', methods=['GET'])
+def get_current_word():
+    try:
+        word = db.reference("Gestures/word").get()
+        return jsonify({"word": word if word else ""}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # API Route to Get Latest Gesture
 @app.route('/gesture', methods=['GET'])
