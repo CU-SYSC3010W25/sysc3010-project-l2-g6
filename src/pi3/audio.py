@@ -1,19 +1,18 @@
 import asyncio
 import firebase_admin
 from firebase_admin import credentials, db
+import sounddevice as sd
 import numpy as np
 import speech_recognition as sr
 from gtts import gTTS
 import os
-import pyaudio
-from collections import deque
-from sense_hat import SenseHat
 import time
-import threading
 import logging
+from sense_hat import SenseHat
+import queue
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize hardware
@@ -21,199 +20,185 @@ sense = SenseHat()
 sense.clear()
 
 # Audio Configuration
-CHUNK = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
 RATE = 16000
-SILENCE_THRESHOLD = 15  # Adjusted for better sensitivity
-MIN_SPEECH_DURATION = 1.0  # Reduced minimum duration
-MAX_SILENCE_GAP = 0.7  # Increased allowed gap
+CHUNK_SIZE = 1024
+MAX_RECORD_SECONDS = 15
 
 class AudioProcessor:
     def __init__(self):
-        # Audio setup
-        self.audio = pyaudio.PyAudio()
-        self.stream = None
-        self.recognizer = sr.Recognizer()
-        self.recognizer.energy_threshold = SILENCE_THRESHOLD
-        self.recognizer.dynamic_energy_threshold = True
+        # Recording state
+        self.is_recording = False
+        self.audio_buffer = []
+        self.recording_start_time = 0
         
-        # Speech detection state
-        self.speech_buffer = deque(maxlen=int(RATE * 10 / CHUNK))  # 10-second buffer
-        self.speech_active = False
-        self.last_loud_time = 0
-        
-        # State management
+        # System state
         self.is_hearing = False
         self.is_speaking = False
         self.current_gesture = ""
         
-        # Event loop setup
-        self.loop = asyncio.new_event_loop()
-        self.loop_thread = threading.Thread(target=self.start_loop, daemon=True)
-        self.loop_thread.start()
+        # Thread-safe communication
+        self.command_queue = queue.Queue()
         
-        # Initialize audio stream
-        asyncio.run_coroutine_threadsafe(self.init_audio(), self.loop).result()
-        
-        # Firebase setup
+        # Initialize Firebase
         cred = credentials.Certificate("../../config/interprePi access key.json")
         firebase_admin.initialize_app(cred, {
             "databaseURL": "https://sysc-3010-project-l2-g6-default-rtdb.firebaseio.com"
         })
-        self.start_firebase_listeners()
+        self._setup_firebase()
         
-        logger.info("System initialized")
+        # Setup joystick handler
+        sense.stick.direction_any = self._joystick_handler
+        
+        logger.info("System ready. Joystick controls recording when isHearing=True")
 
-    def start_loop(self):
-        asyncio.set_event_loop(self.loop)
-        self.loop.run_forever()
-
-    async def init_audio(self):
-        try:
-            self.stream = self.audio.open(
-                format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                frames_per_buffer=CHUNK,
-                stream_callback=self.audio_callback,
-                start=False,
-                input_device_index=None  # Auto-select default input
-            )
-            logger.info("Audio stream ready")
-        except Exception as e:
-            logger.error(f"Audio init failed: {e}")
-
-    def audio_callback(self, in_data, frame_count, time_info, status):
-        if not self.is_hearing:
-            return (in_data, pyaudio.paContinue)
-            
-        audio_data = np.frombuffer(in_data, dtype=np.int16)
-        current_volume = np.abs(audio_data).mean()
-        current_time = time.time()
-
-        # Speech detection logic
-        if current_volume > SILENCE_THRESHOLD:
-            self.last_loud_time = current_time
-            if not self.speech_active:
-                self.speech_active = True
-                logger.debug("Speech started")
-            self.speech_buffer.append(audio_data)
-        elif self.speech_active and (current_time - self.last_loud_time) < MAX_SILENCE_GAP:
-            self.speech_buffer.append(audio_data)  # Keep recording through short pauses
-        elif self.speech_active:
-            # End of speech detected
-            speech_duration = current_time - (self.last_loud_time - MAX_SILENCE_GAP)
-            if speech_duration >= MIN_SPEECH_DURATION:
-                asyncio.run_coroutine_threadsafe(
-                    self.process_speech(), 
-                    self.loop
-                )
-            self.speech_active = False
-            self.speech_buffer.clear()
-            logger.debug("Speech ended")
-                
-        return (in_data, pyaudio.paContinue)
-
-    async def process_speech(self):
-        if not self.speech_buffer:
-            return
-            
-        audio_segment = np.concatenate(list(self.speech_buffer))
-        try:
-            # Convert to speech_recognition AudioData
-            audio_data = sr.AudioData(
-                audio_segment.tobytes(),
-                sample_rate=RATE,
-                sample_width=2  # 16-bit = 2 bytes
-            )
-            
-            # Try Google STT with timeout
-            text = self.recognizer.recognize_google(
-                audio_data, 
-                language="en-US",
-                show_all=False
-            )
-            
-            logger.info(f"Transcribed: {text}")
-            db.reference("Gestures/word").set(text)
-            await self.display_text(text)
-            
-        except sr.UnknownValueError:
-            logger.debug("Google Speech Recognition could not understand audio")
-        except sr.RequestError as e:
-            logger.error(f"Could not request results from Google Speech Recognition service; {e}")
-        except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-
-    async def display_text(self, text):
-        try:
-            sense.show_message(text, 
-                             scroll_speed=0.1,
-                             text_colour=[255, 255, 255],
-                             back_colour=[0, 0, 0])
-        except Exception as e:
-            logger.error(f"Display error: {e}")
-
-    async def text_to_speech(self, text):
-        if not text:
-            return
-            
-        try:
-            logger.info(f"Speaking: {text}")
-            await self.display_text(text)
-            
-            tts = gTTS(text=text, lang='en')
-            tts.save('response.mp3')
-            os.system('mpg321 -q response.mp3')
-        except Exception as e:
-            logger.error(f"TTS error: {e}")
-
-    def start_firebase_listeners(self):
+    def _setup_firebase(self):
+        """Configure Firebase listeners"""
         def hearing_listener(event):
             self.is_hearing = event.data
-            if not self.stream:
-                return
-                
-            if self.is_hearing and not self.stream.is_active():
-                self.stream.start_stream()
-                logger.info("Listening mode: ACTIVE")
-            elif not self.is_hearing and self.stream.is_active():
-                self.stream.stop_stream()
-                logger.info("Listening mode: PAUSED")
+            logger.info(f"isHearing set to: {self.is_hearing}")
+            if not self.is_hearing and self.is_recording:
+                self.command_queue.put(("stop_recording", None))
 
         def speaking_listener(event):
             self.is_speaking = event.data
-            logger.info(f"Speaking mode: {self.is_speaking}")
-            if self.is_speaking:
-                current = db.reference("Gestures/currentGesture").get()
-                if current:
-                    asyncio.run_coroutine_threadsafe(
-                        self.text_to_speech(current),
-                        self.loop
-                    )
+            logger.info(f"isSpeaking set to: {self.is_speaking}")
 
         def gesture_listener(event):
-            if not self.is_speaking or not event.data:
-                return
-                
-            if event.data != self.current_gesture:
-                self.current_gesture = event.data
-                logger.info(f"New gesture: {event.data}")
-                asyncio.run_coroutine_threadsafe(
-                    self.text_to_speech(event.data),
-                    self.loop
-                )
+            if self.is_speaking and event.data:
+                if event.data != "nothing" or event.data != "del":
+                    self.current_gesture = event.data
+                    self.command_queue.put(("text_to_speech", event.data))
 
         db.reference("settings/3/isHearing").listen(hearing_listener)
         db.reference("settings/3/isSpeaking").listen(speaking_listener)
         db.reference("Gestures/currentGesture").listen(gesture_listener)
-        logger.info("Firebase listeners active")
+
+    def _joystick_handler(self, event):
+        """Handle joystick button presses"""
+        if event.action == 'pressed' and self.is_hearing:
+            if not self.is_recording:
+                self.command_queue.put(("start_recording", None))
+            else:
+                self.command_queue.put(("stop_recording", None))
+
+    async def _start_recording(self):
+        """Begin audio recording"""
+        if self.is_recording:
+            return
+            
+        self.is_recording = True
+        self.audio_buffer = []
+        self.recording_start_time = time.time()
+        
+        # Start audio stream
+        self.stream = sd.InputStream(
+            samplerate=RATE,
+            blocksize=CHUNK_SIZE,
+            channels=1,
+            dtype='int16',
+            callback=self._audio_callback
+        )
+        self.stream.start()
+        
+        sense.show_letter("R", text_colour=[255, 0, 0])  # Red R for recording
+        logger.info("Recording started")
+
+    async def _stop_recording(self):
+        """Stop recording and process audio"""
+        if not self.is_recording:
+            return
+            
+        self.is_recording = False
+        self.stream.stop()
+        self.stream.close()
+        
+        sense.show_letter("P", text_colour=[0, 255, 0])  # Green P for processing
+        logger.info("Recording stopped")
+        
+        # Process the recorded audio
+        await self._process_recording()
+
+    def _audio_callback(self, indata, frames, time_info, status):
+        """Collect audio chunks while recording"""
+        if self.is_recording:
+            self.audio_buffer.append(indata.copy())
+            
+            # Auto-stop if exceeding max duration
+            if time.time() - self.recording_start_time > MAX_RECORD_SECONDS:
+                self.command_queue.put(("stop_recording", None))
+
+    async def _process_recording(self):
+        """Process the recorded audio"""
+        try:
+            # Combine audio chunks
+            audio_data = np.concatenate(self.audio_buffer)
+            
+            # Convert to speech_recognition format
+            audio = sr.AudioData(
+                audio_data.tobytes(),
+                sample_rate=RATE,
+                sample_width=2
+            )
+            
+            # Transcribe
+            text = sr.Recognizer().recognize_google(audio)
+            logger.info(f"Transcribed: {text}")
+            
+            # Push to Firebase
+            db.reference("Gestures/word").set(text)
+            
+            # Display result
+            sense.show_message(text, scroll_speed=0.1)
+            
+        except sr.UnknownValueError:
+            logger.warning("Could not understand audio")
+            sense.show_message("?", text_colour=[255, 255, 0])
+        except Exception as e:
+            logger.error(f"Processing error: {e}")
+            sense.show_message("!", text_colour=[255, 0, 0])
+        finally:
+            sense.clear()
+
+    async def text_to_speech(self, text):
+        """Convert text to speech"""
+        if not text:
+            return
+            
+        try:
+            if text == "nothing":
+                return
+            if text == "del":
+                return
+            if text == "space":
+                return
+            if text == "clear""
+                return
+            
+            # Speak first
+            tts = gTTS(text=text, lang='en')
+            tts.save('response.mp3')
+            os.system('mpg321 -q response.mp3')
+            # Then display text
+            sense.show_message(text, scroll_speed=0.1)
+        except Exception as e:
+            logger.error(f"TTS error: {e}")
 
     async def run(self):
+        """Main application loop"""
         while True:
-            await asyncio.sleep(1)
+            # Process commands from queue
+            try:
+                cmd, arg = self.command_queue.get_nowait()
+                if cmd == "start_recording":
+                    await self._start_recording()
+                elif cmd == "stop_recording":
+                    await self._stop_recording()
+                elif cmd == "text_to_speech":
+                    await self.text_to_speech(arg)
+            except queue.Empty:
+                pass
+            
+            await asyncio.sleep(0.1)
 
 def main():
     processor = AudioProcessor()
@@ -221,10 +206,9 @@ def main():
         asyncio.run(processor.run())
     except KeyboardInterrupt:
         sense.clear()
-        if processor.stream:
-            processor.stream.stop_stream()
+        if hasattr(processor, 'stream') and processor.stream:
+            processor.stream.stop()
             processor.stream.close()
-        processor.audio.terminate()
         logger.info("System shutdown")
 
 if __name__ == "__main__":
