@@ -171,7 +171,7 @@ class AudioProcessor:
                 return
             if text == "space":
                 return
-            if text == "clear"
+            if text == "clear":
                 return
             
             # Speak first
