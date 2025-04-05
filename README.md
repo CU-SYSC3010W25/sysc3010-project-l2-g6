@@ -1,22 +1,52 @@
-# interprePi - Setting up the System
+# SYSC 3010 - interprePi - Setting up the System
+**TA: Afsoon Khodaee**
+
+**Project Members:**
+- Andrew Rivera
+
+// add your names here
+
+## Project Summary
+
 // please add your respective sections of code and set up instructions
 
-## Within the src folder:
-The src folder contains all source code. It is divided into sub folders: GUI, camera, output, pi3, and processorFull. 
-- GUI: This folder contains the GUI to firebase listener file, both the interpreter and signer html files, our local database to hold the chat log (conversation.db), and a folder containing the interprePi icons for when we navigate to the site on our browser.
+# Repo Structure of Relevant Folders:
+  - Folder Descriptions:
+      - src
+      - EndtoEndDemo
+      - UnitTestDemo
+      - config
+      - WeeklyUpdates
+    
+  - Setup Descriptions
 
-## Within the EndToEndDemo folder:
+# Folders
+## src folder:
+The src folder contains all source code. It is divided into sub folders: GUI, camera, output, pi3, and processorFull. 
+- **GUI:** This folder contains the GUI to firebase listener file, both the interpreter and signer html files, our local database to hold the chat log (conversation.db), and a folder containing the interprePi icons for when we navigate to the site on our browser.
+
+- **camera:** This directory contains the camera and servo implementations alongside the firebase listener file, config file and addip shell script. The servo implementation is wihtin the Camera.py file to ensure that both devices can work asynchronously and prevent GPIO conflicts. The Listener.py file is used to listen to changes on the database such as servo direction and stream state.
+
+## EndToEndDemo folder:
 This folder contains all of our listener and writing files for our end to end demo. We have a listener and writer file for each pi that is connected to the firebase. 
 
-## Within the UnitTestsDemo folder:
+## UnitTestsDemo folder:
 This folder contains all the files we used for our unit test demo. This folder is divided into sub folders as well: GUI, camera, ethernet_connection, pi3, processor, and servo. 
-- GUI: this folder contains a test file to check that the speaker and microphone buttons on the GUI update the firebase accordingly, another test file to ensure that the GUI is grabbing the current gesture and displaying it on the GUI, a test file to validate the stream is being displayed on our GUI, and a test to validate that our web server is up and running.
+- **GUI:** This folder contains a test file to check that the speaker and microphone buttons on the GUI update the firebase accordingly, another test file to ensure that the GUI is grabbing the current gesture and displaying it on the GUI, a test file to validate the stream is being displayed on our GUI, and a test to validate that our web server is up and running.
 
-## Within the config folder:
+- **camera:** This directory contains the test file for the camera component, test_camera.py. It verifies the cameras connection with the Raspberry Pi and runs a script to preview the camera's input for 5 seconds to visually see it working.
+
+- **ethernet_connection:** This directory contains the test file for the connection between the camera and proccesor node, test_ethernet.py and test_receive_ethernet.py. It verifies the physical connection between the two nodes by checking if the correct ips are added to each device and checks to see if it able to send and receive (ping) data between thetwo nodes.
+
+- **servo:** This directory contains the test file for the servo, test_servo.py. It tests the functionality of the hardware devices by checking the max, min, and out of range angle values. As well as testing for the correct GPIO connection, max and min duty cycles. 
+
+## config folder:
 This folder contains the access key JSON file for our firebase DB.
 
-## Within the WeeklyUpdates folder:
+## WeeklyUpdates folder:
 This folder contains all of our WIPURs. This folder is divided into subfolders containing our team's WIPUR from every week.
+
+# Setup Instructions:
 
 ## Setting up the GUI
 
@@ -32,5 +62,20 @@ After this, we can run our http server. Navigate to where the interpreter and si
 To run the GUI unit tests the files are all located in the UnitTestsDemo/GUI folder. After navigating to this folder in your raspberry pi terminal you can run any of the tests using this command:
 python3 (test_file_name_).py
 - ex: python3 audio_mic_test.py
+
+## Setting up the Camera and Servo
+
+To set up the camera and servo components:
+1. Start by runnning the run_camera.py script inside sysc3010-project-l2-g6/src folder (python3 run_camera.py). From here, the servo is ready to go, however for the camera requires further set up.
+2. To start streaming the video, it has to be manually turned on within the database to prevent unwanted to changes to it. From the database, navitage to settings -> 0 -> Stream and toggle it from false to true (or true to false then to true again if it was initially at true). After that the camera is ready to go, and is sending its video input to the processor node.
+   
+    - In the rare case that it is not streaming after these steps, the issue is most likely due to the ip configuration. In that case, open the linux terminal and navigate to sysc3010-project-l2-g6/src/camera and run the command "sh addip.sh". Verify that the ip is added by running the command "hostname -I".
+  
+## Running the servo, camera and ethernet Unit Tests
+
+To run these unit steps:
+1. Navigate to the sysc3010-project-l2-g6/UnitTestsDemo. You will see all the folders each resprective test cases for the servo, camera and ethernet.
+2. Run each test file separately (python3 run_camera.py). Ensure that you are in the correct directory when running the test files. 
+Running all these tests should all pass. 
 
   
