@@ -1,12 +1,16 @@
 # SYSC 3010 - interprePi - Setting up the System
-**TA: Afsoon Khodaee**
+![alt text](https://github.com/CU-SYSC3010W25/sysc3010-project-l2-g6/blob/main/misc/logo.jpg "Logo Title Text 1")
 
 **Project Members:**
 - Andrew Rivera
+// add your names here, no student ID
 
-// add your names here
-
+**TA: Afsoon Khodaee**
 ## Project Summary
+// Put project summary here
+
+
+
 
 // please add your respective sections of code and set up instructions
 
