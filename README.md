@@ -7,6 +7,7 @@
 - Divya Dushyanthan
 - Kyle Mathias
 - Vaanathy Thaneskumar
+- Alec Tratnik
 
 **TA: Afsoon Khodaee**
 
@@ -90,4 +91,23 @@ To run these unit steps:
 2. Run each test file separately (python3 run_camera.py). Ensure that you are in the correct directory when running the test files. 
 Running all these tests should all pass. 
 
-  
+## InterprePi - Voice Module
+### Description
+This moudle is for the input and output of the system, including TTS, STT, and displaying text on the SenseHat.
+To find the code for this module navigate to [this directory](./src/pi3)
+
+### Hardware
+- Raspberry Pi 4 + Sense HAT
+- USB mic/speaker (set as default in `raspi-config`)
+
+### Quick Start
+#### Install dependencies
+```bash
+sudo apt install libportaudio2 mpg321 sense-hat
+python3 -m venv venv && source venv/bin/activate
+pip install firebase-admin sounddevice SpeechRecognition gTTS
+```
+#### Run
+```bash
+python3 audio.py
+```
