@@ -8,7 +8,7 @@
 - Kyle Mathias
 - Vaanathy Thaneskumar
 
-**TA: Afsoon Khodaee: **
+**TA: Afsoon Khodaee**
 
 InterprePi is a modular, real-time sign language interpretation system built on Raspberry Pi hardware to facilitate seamless communication between Deaf and Hard-of-Hearing (DHH) individuals and non-signers. By leveraging edge computing, computer vision, and machine learning, InterprePi captures and interprets sign language gestures locally, converting them into text and optionally speech. Conversely, spoken or typed responses from non-signers are transcribed and displayed for DHH users, enabling fully bidirectional interaction.
 
