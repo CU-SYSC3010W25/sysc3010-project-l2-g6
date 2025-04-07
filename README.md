@@ -2,17 +2,18 @@
 ![alt text](https://github.com/CU-SYSC3010W25/sysc3010-project-l2-g6/blob/main/misc/logo.jpg "Logo Title Text 1")
 
 **Project Members:**
+- Alec Tratnik
 - Andrew Rivera
-// add your names here, no student ID
+- Divya Dushyanthan
+- Kyle Mathias
+- Vaanathy Thaneskumar
 
 **TA: Afsoon Khodaee**
-## Project Summary
-// Put project summary here
+InterprePi is a modular, real-time sign language interpretation system built on Raspberry Pi hardware to facilitate seamless communication between Deaf and Hard-of-Hearing (DHH) individuals and non-signers. By leveraging edge computing, computer vision, and machine learning, InterprePi captures and interprets sign language gestures locally, converting them into text and optionally speech. Conversely, spoken or typed responses from non-signers are transcribed and displayed for DHH users, enabling fully bidirectional interaction.
 
+The system is composed of independently functioning Raspberry Pi nodes, each responsible for a specific task such as video capture, gesture recognition, speech processing, and GUI display. Inter-node communication is managed through lightweight HTTP and WebSocket protocols, with Firebase used only for synchronizing application state. This hybrid local-cloud approach ensures low-latency performance while maintaining user privacy.
 
-
-
-// please add your respective sections of code and set up instructions
+Designed for flexibility and scalability, InterprePi can be deployed across multiple devices or locations, making it ideal for use in classrooms, hospitals, workplaces, and other accessibility-critical environments. It offers an inclusive, privacy-conscious, and cost-effective alternative to traditional interpretation services.
 
 # Repo Structure of Relevant Folders:
   - Folder Descriptions:
@@ -31,6 +32,10 @@ The src folder contains all source code. It is divided into sub folders: GUI, ca
 
 - **camera:** This directory contains the camera and servo implementations alongside the firebase listener file, config file and addip shell script. The servo implementation is wihtin the Camera.py file to ensure that both devices can work asynchronously and prevent GPIO conflicts. The Listener.py file is used to listen to changes on the database such as servo direction and stream state.
 
+- **pi3:** This directory contains the code for the text to speech and speech to text. This is found in the audio.py file.
+
+- **output:** This directory contains the code to initialize the output devices. The code is found in the _init_.py file.
+
 ## EndToEndDemo folder:
 This folder contains all of our listener and writing files for our end to end demo. We have a listener and writer file for each pi that is connected to the firebase. 
 
@@ -42,7 +47,9 @@ This folder contains all the files we used for our unit test demo. This folder i
 
 - **ethernet_connection:** This directory contains the test file for the connection between the camera and proccesor node, test_ethernet.py and test_receive_ethernet.py. It verifies the physical connection between the two nodes by checking if the correct ips are added to each device and checks to see if it able to send and receive (ping) data between thetwo nodes.
 
-- **servo:** This directory contains the test file for the servo, test_servo.py. It tests the functionality of the hardware devices by checking the max, min, and out of range angle values. As well as testing for the correct GPIO connection, max and min duty cycles. 
+- **servo:** This directory contains the test file for the servo, test_servo.py. It tests the functionality of the hardware devices by checking the max, min, and out of range angle values. As well as testing for the correct GPIO connection, max and min duty cycles.
+
+- **pi3:** This directory contains the test files for the text to speech and speech to text functionalities, as well as the LED display. pi3_audio_test.py tests the microphone and speaker output devices, and pi3_led_test.py tests the LED display of what is being said into the microphone. 
 
 ## config folder:
 This folder contains the access key JSON file for our firebase DB.
