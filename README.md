@@ -2,7 +2,7 @@
 ![alt text](https://github.com/CU-SYSC3010W25/sysc3010-project-l2-g6/blob/main/misc/logo.jpg "Logo Title Text 1")
 
 **Project Members:**
-- Alec Tratnik
+- Team Leader: Kyle Mathias
 - Andrew Rivera
 - Divya Dushyanthan
 - Kyle Mathias
