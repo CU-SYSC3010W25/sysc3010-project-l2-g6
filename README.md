@@ -5,7 +5,6 @@
 - Team Leader: Kyle Mathias
 - Andrew Rivera
 - Divya Dushyanthan
-- Kyle Mathias
 - Vaanathy Thaneskumar
 - Alec Tratnik
 
@@ -30,6 +29,8 @@ Designed for flexibility and scalability, InterprePi can be deployed across mult
 # Folders
 ## src folder:
 The src folder contains all source code. It is divided into sub folders: GUI, camera, output, pi3, and processorFull. 
+- **processorFull:** The directory containing the model that interprets the video feed, as well as the necessary scripts to run it, including the node 2 script, the firebase listener, and the config file.
+  
 - **GUI:** This folder contains the GUI to firebase listener file, both the interpreter and signer html files, our local database to hold the chat log (conversation.db), and a folder containing the interprePi icons for when we navigate to the site on our browser.
 
 - **camera:** This directory contains the camera and servo implementations alongside the firebase listener file, config file and addip shell script. The servo implementation is wihtin the Camera.py file to ensure that both devices can work asynchronously and prevent GPIO conflicts. The Listener.py file is used to listen to changes on the database such as servo direction and stream state.
@@ -43,6 +44,8 @@ This folder contains all of our listener and writing files for our end to end de
 
 ## UnitTestsDemo folder:
 This folder contains all the files we used for our unit test demo. This folder is divided into sub folders as well: GUI, camera, ethernet_connection, pi3, processor, and servo. 
+- **processorFull**: The directory containing the test file for the trained TensorFlow model which will test all 29 test images on it to determine whether the model can accurately predict gestures.
+
 - **GUI:** This folder contains a test file to check that the speaker and microphone buttons on the GUI update the firebase accordingly, another test file to ensure that the GUI is grabbing the current gesture and displaying it on the GUI, a test file to validate the stream is being displayed on our GUI, and a test to validate that our web server is up and running.
 
 - **camera:** This directory contains the test file for the camera component, test_camera.py. It verifies the cameras connection with the Raspberry Pi and runs a script to preview the camera's input for 5 seconds to visually see it working.
@@ -89,7 +92,25 @@ To set up the camera and servo components:
 To run these unit steps:
 1. Navigate to the sysc3010-project-l2-g6/UnitTestsDemo. You will see all the folders each resprective test cases for the servo, camera and ethernet.
 2. Run each test file separately (python3 run_camera.py). Ensure that you are in the correct directory when running the test files. 
-Running all these tests should all pass. 
+Running all these tests should all pass.
+
+## Setting up the Processor
+
+To set up the processor, the following dependencies need to be installed:
+1. opencv: pip install cv2
+2. numpy: pip install numpy
+3. tensorflow: pip install tensorflow
+4. mediapipe: pip install mediapipe
+
+Next, an ethernet cable needs to be connected from the camera pi to the device that is being used as the processor.
+
+Once completed, navigate to the run_processor_full file inside sysc3010-project-l2-g6/src and run it (python3 run_processor_full.py). This should run the processor, and it will begin to receive 
+and interpret video feed from the camera.
+
+## Running the Processor Unit Tests
+
+To run the processor unit tests, navigate to the UnitTestsDemo/processor folder and run test_model.py (python3 test_model.py). This test script uses the images in the UnitTestsDemo/processor/images folder
+to pass to the model to test it.
 
 ## InterprePi - Voice Module
 ### Description
